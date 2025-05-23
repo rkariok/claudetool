@@ -258,7 +258,6 @@ export default function StoneTopEstimator() {
     return maxPieces;
   };
 
-  // CONTINUE IN PART 2...
   // Enhanced drawing upload with Claude backend
   const handleDrawingUpload = async (e, index) => {
     const selectedFile = e.target.files[0];
@@ -574,7 +573,6 @@ export default function StoneTopEstimator() {
     window.html2pdf().from(element).set(opt).save();
   };
 
-  // CONTINUE IN PART 3...
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-6xl space-y-6 text-center">
@@ -871,11 +869,9 @@ export default function StoneTopEstimator() {
           </div>
         </div>
 
-        {/* CONTINUE IN PART 4... */}{/* CONTINUED FROM PART 3... */}
-        
         {/* Results Section */}
         {allResults.length > 0 && (
-          <div className="mt-6 w-full overflow-x-auto">
+          <div className="mt-6 w-full">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
                 Optimized Results 
@@ -982,88 +978,111 @@ export default function StoneTopEstimator() {
               </div>
             )}
 
-            {/* Results Table */}
-            <table className="min-w-full border-collapse border text-sm">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="border px-4 py-2">Product Name</th>
-                  <th className="border px-4 py-2">Stone</th>
-                  <th className="border px-4 py-2">Size</th>
-                  <th className="border px-4 py-2">Qty</th>
-                  <th className="border px-4 py-2">Edge</th>
-                  <th className="border px-4 py-2">Area (sqft)</th>
-                  <th className="border px-4 py-2">Tops/Slab</th>
-                  <th className="border px-4 py-2">Slabs Needed</th>
-                  <th className="border px-4 py-2">Efficiency</th>
-                  <th className="border px-4 py-2">Material $</th>
-                  <th className="border px-4 py-2">Fab $</th>
-                  <th className="border px-4 py-2">Cost $</th>
-                  <th className="border px-4 py-2">Final $</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allResults.map((p, i) => (
-                  <tr key={i} className="text-center">
-                    <td className="border px-4 py-2 text-left">
-                      <div className="font-medium">
-                        {p.customName || `Product ${i + 1}`}
-                      </div>
-                      {p.note && (
-                        <div className="text-xs text-gray-600 mt-1">{p.note}</div>
-                      )}
+            {/* Results Table - UPDATED RESPONSIVE VERSION */}
+            <div className="overflow-hidden">
+              <table className="w-full border-collapse border text-xs">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="border px-2 py-2 text-left">Product</th>
+                    <th className="border px-2 py-2">Stone</th>
+                    <th className="border px-2 py-2">Size</th>
+                    <th className="border px-2 py-2">Qty</th>
+                    <th className="border px-2 py-2 hidden md:table-cell">Edge</th>
+                    <th className="border px-2 py-2 hidden lg:table-cell">Area</th>
+                    <th className="border px-2 py-2">Per Slab</th>
+                    <th className="border px-2 py-2">Slabs</th>
+                    <th className="border px-2 py-2">Eff %</th>
+                    <th className="border px-2 py-2 hidden md:table-cell">Material</th>
+                    <th className="border px-2 py-2 hidden md:table-cell">Fab</th>
+                    <th className="border px-2 py-2 hidden lg:table-cell">Cost</th>
+                    <th className="border px-2 py-2 font-bold">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allResults.map((p, i) => (
+                    <tr key={i} className="text-center hover:bg-gray-50">
+                      <td className="border px-2 py-2 text-left">
+                        <div className="font-medium text-xs">
+                          {p.customName || `Product ${i + 1}`}
+                        </div>
+                        {p.note && (
+                          <div className="text-xs text-gray-600 mt-1 hidden xl:block">{p.note}</div>
+                        )}
+                      </td>
+                      <td className="border px-2 py-2 text-xs">{p.stone}</td>
+                      <td className="border px-2 py-2 text-xs">{p.width}×{p.depth}</td>
+                      <td className="border px-2 py-2">{p.quantity}</td>
+                      <td className="border px-2 py-2 text-xs hidden md:table-cell">{p.edgeDetail}</td>
+                      <td className="border px-2 py-2 hidden lg:table-cell">{p.result?.usableAreaSqft?.toFixed(1)}</td>
+                      <td className="border px-2 py-2 font-semibold text-purple-600">
+                        {p.result?.topsPerSlab || '-'}
+                      </td>
+                      <td className="border px-2 py-2 font-semibold text-blue-600">
+                        {p.result?.totalSlabsNeeded || '-'}
+                      </td>
+                      <td className="border px-2 py-2">
+                        <span className={`font-semibold ${
+                          (p.result?.efficiency || 0) > 80 ? 'text-green-600' : 
+                          (p.result?.efficiency || 0) > 60 ? 'text-yellow-600' : 'text-red-600'
+                        }`}>
+                          {p.result?.efficiency?.toFixed(0) || '0'}
+                        </span>
+                      </td>
+                      <td className="border px-2 py-2 text-xs hidden md:table-cell">
+                        ${p.result?.materialCost?.toFixed(0) || '0'}
+                      </td>
+                      <td className="border px-2 py-2 text-xs hidden md:table-cell">
+                        ${p.result?.fabricationCost?.toFixed(0) || '0'}
+                      </td>
+                      <td className="border px-2 py-2 text-xs hidden lg:table-cell">
+                        ${p.result?.rawCost?.toFixed(0) || '0'}
+                      </td>
+                      <td className="border px-2 py-2 font-bold text-green-600">
+                        ${p.result?.finalPrice?.toFixed(0) || '0'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="bg-gray-100 font-bold">
+                    <td colSpan={9} className="border px-2 py-2 text-right">Totals:</td>
+                    <td className="border px-2 py-2 text-center text-blue-700 hidden md:table-cell">
+                      ${allResults.reduce((sum, p) => sum + (p.result?.materialCost || 0), 0).toFixed(0)}
                     </td>
-                    <td className="border px-4 py-2">{p.stone}</td>
-                    <td className="border px-4 py-2">{p.width}×{p.depth}</td>
-                    <td className="border px-4 py-2">{p.quantity}</td>
-                    <td className="border px-4 py-2">{p.edgeDetail}</td>
-                    <td className="border px-4 py-2">{p.result?.usableAreaSqft?.toFixed(2) || 'N/A'}</td>
-                    <td className="border px-4 py-2 font-semibold text-purple-600">
-                      {p.result?.topsPerSlab || 'N/A'}
+                    <td className="border px-2 py-2 text-center text-orange-600 hidden md:table-cell">
+                      ${allResults.reduce((sum, p) => sum + (p.result?.fabricationCost || 0), 0).toFixed(0)}
                     </td>
-                    <td className="border px-4 py-2 font-semibold text-blue-600">
-                      {p.result?.totalSlabsNeeded || 'N/A'}
+                    <td className="border px-2 py-2 text-center text-gray-700 hidden lg:table-cell">
+                      ${allResults.reduce((sum, p) => sum + (p.result?.rawCost || 0), 0).toFixed(0)}
                     </td>
-                    <td className="border px-4 py-2">
-                      <span className={`font-semibold ${
-                        (p.result?.efficiency || 0) > 80 ? 'text-green-600' : 
-                        (p.result?.efficiency || 0) > 60 ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
-                        {p.result?.efficiency?.toFixed(1) || '0'}%
-                      </span>
-                    </td>
-                    <td className="border px-4 py-2 font-semibold text-blue-700">
-                      ${p.result?.materialCost?.toFixed(2) || '0.00'}
-                    </td>
-                    <td className="border px-4 py-2 font-semibold text-orange-600">
-                      ${p.result?.fabricationCost?.toFixed(2) || '0.00'}
-                    </td>
-                    <td className="border px-4 py-2 font-semibold text-gray-700">
-                      ${p.result?.rawCost?.toFixed(2) || '0.00'}
-                    </td>
-                    <td className="border px-4 py-2 font-semibold text-green-600">
-                      ${p.result?.finalPrice?.toFixed(2) || '0.00'}
+                    <td className="border px-2 py-2 text-center text-green-600 text-sm">
+                      ${allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2)}
                     </td>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="bg-gray-100 font-bold">
-                  <td colSpan={9} className="border px-4 py-2 text-right">Totals:</td>
-                  <td className="border px-4 py-2 text-center text-blue-700">
-                    ${allResults.reduce((sum, p) => sum + (p.result?.materialCost || 0), 0).toFixed(2)}
-                  </td>
-                  <td className="border px-4 py-2 text-center text-orange-600">
-                    ${allResults.reduce((sum, p) => sum + (p.result?.fabricationCost || 0), 0).toFixed(2)}
-                  </td>
-                  <td className="border px-4 py-2 text-center text-gray-700">
-                    ${allResults.reduce((sum, p) => sum + (p.result?.rawCost || 0), 0).toFixed(2)}
-                  </td>
-                  <td className="border px-4 py-2 text-center text-green-600">
-                    ${allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2)}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
+                </tfoot>
+              </table>
+            </div>
+
+            {/* Mobile-Friendly Summary Cards (shown on small screens) */}
+            <div className="md:hidden mt-4 space-y-3">
+              {allResults.map((p, i) => (
+                <div key={i} className="bg-white p-4 rounded-lg border shadow-sm">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold">{p.customName || `Product ${i + 1}`}</h4>
+                    <span className="text-green-600 font-bold">${p.result?.finalPrice?.toFixed(0)}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <div>Stone: {p.stone}</div>
+                    <div>Size: {p.width}×{p.depth}</div>
+                    <div>Quantity: {p.quantity}</div>
+                    <div>Slabs: {p.result?.totalSlabsNeeded || '-'}</div>
+                    <div>Per Slab: {p.result?.topsPerSlab || '-'}</div>
+                    <div>Efficiency: {p.result?.efficiency?.toFixed(0) || '0'}%</div>
+                  </div>
+                  {p.note && <div className="mt-2 text-xs text-gray-500">{p.note}</div>}
+                </div>
+              ))}
+            </div>
 
             {/* Summary Statistics */}
             <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
