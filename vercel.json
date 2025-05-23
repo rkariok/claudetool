@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/claude-extract-dimensions.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
+}
