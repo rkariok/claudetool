@@ -695,11 +695,21 @@ export default function StoneTopEstimator() {
         (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
       
       // Prepare email data
-      const templateParams = {
-        to_email: userInfo.email,
-        to_name: userInfo.name,
-        phone: userInfo.phone || 'Not provided',
-        total_price: '
+     const templateParams = {
+  to_email: userInfo.email,
+  to_name: userInfo.name,
+  phone: userInfo.phone || 'Not provided',
+  total_price: '$' + totalPrice,
+  total_slabs: totalSlabs.toString(),
+  average_efficiency: avgEfficiency + '%',
+  products_list: allResults.map(p => 
+    `- ${p.customName || 'Product'}: ${p.stone} ${p.width}"×${p.depth}" (Qty: ${p.quantity}) - $${p.result?.finalPrice?.toFixed(2) || '0.00'}`
+  ).join('\n'),
+  quote_date: new Date().toLocaleDateString()
+};
+
+
+       total_price: '$' + totalPrice,
 
       // Send email using EmailJS
       const response = await window.emailjs.send(
