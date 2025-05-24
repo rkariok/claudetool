@@ -502,79 +502,163 @@ export default function StoneTopEstimator() {
       return;
     }
 
+    // Create a container div that will be converted to PDF
     const element = document.createElement('div');
-    element.className = 'pdf-content p-6';
+    element.style.padding = '20px';
+    element.style.fontFamily = 'Arial, sans-serif';
+    element.style.fontSize = '14px';
+    element.style.color = '#000';
+    element.style.backgroundColor = '#fff';
+    element.style.width = '210mm'; // A4 width
     
-    element.innerHTML = `
-      <div style="text-align: center; margin-bottom: 20px;">
-        <h1 style="font-size: 24px; font-weight: bold;">AIC SURFACES - OPTIMIZED STONE QUOTE</h1>
-        <p>Date: ${new Date().toLocaleDateString()}</p>
+    // Build the HTML content as a string first
+    let htmlContent = `
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="font-size: 28px; font-weight: bold; margin: 0; color: #1e40af;">AIC SURFACES</h1>
+        <h2 style="font-size: 20px; margin: 10px 0; color: #333;">OPTIMIZED STONE QUOTE</h2>
+        <p style="margin: 5px 0; color: #666;">Date: ${new Date().toLocaleDateString()}</p>
+      </div>
+      
+      <div style="margin-bottom: 30px; padding: 15px; background-color: #f9fafb; border-radius: 8px;">
+        <h3 style="font-size: 18px; font-weight: bold; margin: 0 0 15px 0; color: #1e40af;">Customer Information</h3>
+        <table style="width: 100%;">
+          <tr>
+            <td style="padding: 5px 0;"><strong>Name:</strong></td>
+            <td style="padding: 5px 0;">${userInfo.name || 'N/A'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 5px 0;"><strong>Email:</strong></td>
+            <td style="padding: 5px 0;">${userInfo.email || 'N/A'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 5px 0;"><strong>Phone:</strong></td>
+            <td style="padding: 5px 0;">${userInfo.phone || 'N/A'}</td>
+          </tr>
+        </table>
       </div>
       
       <div style="margin-bottom: 20px;">
-        <h2 style="font-size: 18px; font-weight: bold;">Customer Information</h2>
-        <p>Name: ${userInfo.name}</p>
-        <p>Email: ${userInfo.email}</p>
-        <p>Phone: ${userInfo.phone}</p>
+        <h3 style="font-size: 18px; font-weight: bold; margin: 0 0 15px 0; color: #1e40af;">Quote Details</h3>
+        <table style="width: 100%; border-collapse: collapse; background-color: #fff;">
+          <thead>
+            <tr style="background-color: #e5e7eb;">
+              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left; font-weight: 600;">Product</th>
+              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left; font-weight: 600;">Stone</th>
+              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: center; font-weight: 600;">Size</th>
+              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: center; font-weight: 600;">Qty</th>
+              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left; font-weight: 600;">Edge</th>
+              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: center; font-weight: 600;">Slabs</th>
+              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: center; font-weight: 600;">Eff %</th>
+              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: right; font-weight: 600;">Price</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    
+    // Add each product row
+    allResults.forEach((p, index) => {
+      htmlContent += `
+            <tr>
+              <td style="border: 1px solid #d1d5db; padding: 10px;">${p.customName || `Product ${index + 1}`}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px;">${p.stone || 'N/A'}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.width}×${p.depth}"</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.quantity}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px;">${p.edgeDetail}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.result?.totalSlabsNeeded || 0}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.result?.efficiency ? p.result.efficiency.toFixed(1) : '0'}%</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: right; font-weight: 600; color: #059669;">${p.result?.finalPrice ? p.result.finalPrice.toFixed(2) : '0.00'}</td>
+            </tr>`;
+      
+      if (p.note) {
+        htmlContent += `
+            <tr>
+              <td colspan="8" style="border: 1px solid #d1d5db; padding: 10px; font-style: italic; background-color: #fffbeb; color: #92400e;">
+                <strong>Note:</strong> ${p.note}
+              </td>
+            </tr>`;
+      }
+    });
+    
+    // Calculate totals
+    const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0);
+    const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
+    const avgEfficiency = allResults.length > 0 ? 
+      (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
+    
+    // Add totals row
+    htmlContent += `
+          </tbody>
+          <tfoot>
+            <tr style="background-color: #f3f4f6; font-weight: bold;">
+              <td colspan="7" style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-size: 16px;">Total:</td>
+              <td style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-size: 16px; color: #059669;">${totalPrice.toFixed(2)}</td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
       
-      <h2 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Optimized Quote Details</h2>
+      <div style="margin-top: 30px; display: flex; justify-content: space-around; text-align: center;">
+        <div style="padding: 20px; background-color: #dbeafe; border-radius: 8px; flex: 1; margin: 0 10px;">
+          <h4 style="margin: 0 0 10px 0; color: #1e40af; font-size: 14px;">Total Slabs</h4>
+          <p style="margin: 0; font-size: 24px; font-weight: bold; color: #1e40af;">${totalSlabs}</p>
+        </div>
+        <div style="padding: 20px; background-color: #d1fae5; border-radius: 8px; flex: 1; margin: 0 10px;">
+          <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 14px;">Avg Efficiency</h4>
+          <p style="margin: 0; font-size: 24px; font-weight: bold; color: #059669;">${avgEfficiency}%</p>
+        </div>
+        <div style="padding: 20px; background-color: #e9d5ff; border-radius: 8px; flex: 1; margin: 0 10px;">
+          <h4 style="margin: 0 0 10px 0; color: #7c3aed; font-size: 14px;">Status</h4>
+          <p style="margin: 0; font-size: 20px; font-weight: bold; color: #7c3aed;">Optimized</p>
+        </div>
+      </div>
+      
+      <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280;">
+        <p style="margin: 5px 0;">This quote is valid for 30 days from ${new Date().toLocaleDateString()}</p>
+        <p style="margin: 5px 0;">Generated by AIC Surfaces Stone Estimator</p>
+        <p style="margin: 5px 0; font-size: 12px;">Developed by Roy Kariok</p>
+      </div>
     `;
     
-    const table = document.createElement('table');
-    table.style.width = '100%';
-    table.style.borderCollapse = 'collapse';
+    // Set the HTML content
+    element.innerHTML = htmlContent;
     
-    table.innerHTML = `
-      <thead>
-        <tr style="background-color: #f2f2f2;">
-          <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Stone</th>
-          <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Size</th>
-          <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Qty</th>
-          <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Edge</th>
-          <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Slabs</th>
-          <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Efficiency</th>
-          <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Price</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${allResults.map(p => `
-          <tr>
-            <td style="border: 1px solid #ddd; padding: 8px;">${p.stone}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">${p.width}×${p.depth}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">${p.quantity}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">${p.edgeDetail}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">${p.result?.totalSlabsNeeded || 'N/A'}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">${p.result?.efficiency ? p.result.efficiency.toFixed(1) + '%' : 'N/A'}</td>
-            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">$${p.result?.finalPrice.toFixed(2)}</td>
-          </tr>
-          ${p.note ? `<tr><td colspan="7" style="border: 1px solid #ddd; padding: 8px; font-style: italic;">Note: ${p.note}</td></tr>` : ''}
-        `).join('')}
-      </tbody>
-    `;
+    // Append to body temporarily (helps with rendering)
+    document.body.appendChild(element);
     
-    const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0);
-    
-    table.innerHTML += `
-      <tfoot>
-        <tr style="font-weight: bold;">
-          <td colspan="6" style="border: 1px solid #ddd; padding: 8px; text-align: right;">Total:</td>
-          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">$${totalPrice.toFixed(2)}</td>
-        </tr>
-      </tfoot>
-    `;
-    
-    element.appendChild(table);
-    
+    // PDF options
     const opt = {
-      margin: 10,
-      filename: `AIC_Optimized_Quote_${userInfo.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`,
+      margin: [10, 10, 10, 10],
+      filename: `AIC_Quote_${userInfo.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight
+      },
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait',
+        compress: true
+      },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
     
-    window.html2pdf().from(element).set(opt).save();
+    // Generate PDF
+    window.html2pdf()
+      .from(element)
+      .set(opt)
+      .save()
+      .then(() => {
+        // Remove the element from body after PDF is generated
+        document.body.removeChild(element);
+      })
+      .catch((error) => {
+        console.error('PDF generation error:', error);
+        document.body.removeChild(element);
+        alert('Failed to generate PDF. Please try again.');
+      });
   };
 
   // EmailJS implementation - NO API NEEDED!
