@@ -186,6 +186,10 @@ export default function StoneTopEstimator() {
     }
   ]);
   const [allResults, setAllResults] = useState([]);
+  
+  // Add email state variables
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailStatus, setEmailStatus] = useState('');
 
   useEffect(() => {
     // Load html2pdf from CDN
@@ -573,6 +577,74 @@ export default function StoneTopEstimator() {
     window.html2pdf().from(element).set(opt).save();
   };
 
+  // Add email sending function
+  const sendEmailToClient = async () => {
+    if (!userInfo.email || !userInfo.name) {
+      alert("Please fill in customer name and email first!");
+      return;
+    }
+
+    if (allResults.length === 0) {
+      alert("Please calculate estimates first!");
+      return;
+    }
+
+    setSendingEmail(true);
+    setEmailStatus('Sending email...');
+
+    try {
+      // Prepare products data for email
+      const products = allResults.map(p => ({
+        name: p.customName || `Product ${allResults.indexOf(p) + 1}`,
+        stone: p.stone,
+        dimensions: `${p.width}" × ${p.depth}"`,
+        quantity: p.quantity,
+        slabs: p.result?.totalSlabsNeeded || 0,
+        price: p.result?.finalPrice?.toFixed(2) || '0.00'
+      }));
+
+      const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2);
+      const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
+      const averageEfficiency = allResults.length > 0 ? 
+        (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
+
+      // Send email via API
+      const response = await fetch('/api/send-quote-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerEmail: userInfo.email,
+          customerName: userInfo.name,
+          customerPhone: userInfo.phone,
+          products,
+          totalPrice,
+          totalSlabs,
+          averageEfficiency
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setEmailStatus('✅ Email sent successfully!');
+        alert(`✅ Quote sent successfully to ${userInfo.email}!\n\nThe customer will receive a detailed quote with all products, pricing, and optimization details.`);
+      } else {
+        throw new Error(result.error || 'Failed to send email');
+      }
+      
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      setEmailStatus('❌ Failed to send email');
+      alert(`❌ Failed to send email: ${error.message}\n\nPlease check your internet connection and try again.`);
+    } finally {
+      setSendingEmail(false);
+      // Clear status after 5 seconds
+      setTimeout(() => setEmailStatus(''), 5000);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-6xl space-y-6 text-center">
@@ -813,7 +885,7 @@ export default function StoneTopEstimator() {
           </div>
         ))}
 
-        <div className="flex space-x-4 justify-center">
+        <div className="flex flex-wrap gap-4 justify-center">
           <button
             onClick={addProduct}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -829,22 +901,62 @@ export default function StoneTopEstimator() {
           </button>
           
           {allResults.length > 0 && (
-            <button
-              onClick={generatePDF}
-              className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold"
-            >
-              Generate PDF Quote
-            </button>
+            <>
+              <button
+                onClick={generatePDF}
+                className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold"
+              >
+                📄 Generate PDF
+              </button>
+              
+              <button
+                onClick={sendEmailToClient}
+                disabled={sendingEmail || !userInfo.email}
+                className={`px-6 py-3 text-white rounded font-semibold transition-all ${
+                  sendingEmail || !userInfo.email 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-purple-600 hover:bg-purple-700'
+                }`}
+              >
+                {sendingEmail ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Sending...
+                  </span>
+                ) : (
+                  '📧 Email Quote'
+                )}
+              </button>
+            </>
           )}
         </div>
+
+        {/* Email status message */}
+        {emailStatus && (
+          <div className={`mt-4 p-4 rounded-lg text-center font-medium animate-pulse ${
+            emailStatus.includes('✅') ? 'bg-green-100 text-green-800 border border-green-300' : 
+            emailStatus.includes('❌') ? 'bg-red-100 text-red-800 border border-red-300' : 
+            'bg-blue-100 text-blue-800 border border-blue-300'
+          }`}>
+            {emailStatus}
+          </div>
+        )}
 
         {/* Contact Information */}
         <div className="bg-gray-50 p-4 rounded shadow-md space-y-4 text-left">
           <h2 className="text-lg font-semibold">Contact Information</h2>
+          {allResults.length > 0 && !userInfo.email && (
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded mb-4">
+              ⚠️ Email address is required to send quotes
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input
               type="text"
-              placeholder="Full Name"
+              placeholder="Full Name *"
               value={userInfo?.name || ""}
               onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
               className="border px-4 py-2 rounded w-full"
@@ -852,10 +964,12 @@ export default function StoneTopEstimator() {
             />
             <input
               type="email"
-              placeholder="Email"
+              placeholder="Email *"
               value={userInfo?.email || ""}
               onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-              className="border px-4 py-2 rounded w-full"
+              className={`border px-4 py-2 rounded w-full ${
+                allResults.length > 0 && !userInfo.email ? 'border-red-500' : ''
+              }`}
               required
             />
             <input
@@ -864,7 +978,6 @@ export default function StoneTopEstimator() {
               value={userInfo?.phone || ""}
               onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
               className="border px-4 py-2 rounded w-full"
-              required
             />
           </div>
         </div>
