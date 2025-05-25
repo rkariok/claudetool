@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-// Slab Layout Visualization Component
+// Modern styled Slab Layout Visualization Component
 const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSlab, includeKerf, kerfWidth }) => {
   if (!pieces || pieces.length === 0) return null;
 
@@ -48,7 +48,6 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
         }
       }
     } else {
-      // Mixed orientation logic - simplified for now
       const verticalCols = Math.floor((slabWidth + kerf) / (pieceWidth + kerf));
       const verticalRows = Math.floor((slabHeight + kerf) / (pieceHeight + kerf));
       const maxVertical = verticalCols * verticalRows;
@@ -84,13 +83,13 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
   const scaledSlabHeight = slabHeight * scale;
 
   return (
-    <div className="relative">
-      <div className="mb-2 text-sm text-gray-600 text-center">
+    <div className="relative bg-white rounded-xl p-4 border border-gray-200">
+      <div className="mb-3 text-sm text-gray-600 text-center font-medium">
         Slab: {slabWidth}" × {slabHeight}"
       </div>
       
       <div 
-        className="relative border-2 border-gray-800 bg-gray-100 mx-auto" 
+        className="relative border-2 border-gray-300 bg-gray-50 mx-auto rounded-lg" 
         style={{ 
           width: `${scaledSlabWidth}px`, 
           height: `${scaledSlabHeight}px`
@@ -99,10 +98,10 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
         {layoutPieces.map((piece) => (
           <div
             key={piece.id}
-            className={`absolute border-2 flex items-center justify-center text-xs font-semibold ${
+            className={`absolute border-2 flex items-center justify-center text-xs font-semibold rounded ${
               piece.orientation === 'vertical' 
-                ? 'bg-blue-200 border-blue-600 text-blue-800' 
-                : 'bg-orange-200 border-orange-600 text-orange-800'
+                ? 'bg-gray-100 border-gray-400 text-gray-700' 
+                : 'bg-gray-200 border-gray-500 text-gray-800'
             }`}
             style={{
               left: `${piece.x * scale}px`,
@@ -112,8 +111,8 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
             }}
           >
             <div className="text-center">
-              <div>{piece.id}</div>
-              <div className="text-xs">{piece.width}×{piece.height}</div>
+              <div className="font-bold">{piece.id}</div>
+              <div className="text-xs opacity-75">{piece.width}×{piece.height}</div>
             </div>
           </div>
         ))}
@@ -123,7 +122,7 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
             {Array.from(new Set(layoutPieces.map(p => p.x + p.width))).map((x, i) => (
               <div
                 key={`v-kerf-${i}`}
-                className="absolute bg-red-300 opacity-70"
+                className="absolute bg-red-400 opacity-50"
                 style={{
                   left: `${x * scale}px`,
                   top: '0px',
@@ -135,7 +134,7 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
             {Array.from(new Set(layoutPieces.map(p => p.y + p.height))).map((y, i) => (
               <div
                 key={`h-kerf-${i}`}
-                className="absolute bg-red-300 opacity-70"
+                className="absolute bg-red-400 opacity-50"
                 style={{
                   left: '0px',
                   top: `${y * scale}px`,
@@ -148,7 +147,7 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
         )}
       </div>
       
-      <div className="mt-2 text-xs text-gray-500 text-center">
+      <div className="mt-3 text-xs text-gray-500 text-center">
         Showing {layoutPieces.length} of {pieces.length} pieces (max {maxPiecesPerSlab}/slab)
       </div>
     </div>
@@ -190,6 +189,9 @@ export default function StoneTopEstimator() {
   // Add email state variables
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailStatus, setEmailStatus] = useState('');
+
+  // Progress tracking
+  const [currentStep, setCurrentStep] = useState(1);
 
   useEffect(() => {
     // Load html2pdf from CDN
@@ -489,6 +491,7 @@ export default function StoneTopEstimator() {
     }));
     setProducts(updatedProducts);
     setAllResults(results);
+    setCurrentStep(4);
   };
 
   const generatePDF = () => {
@@ -514,13 +517,13 @@ export default function StoneTopEstimator() {
     // Build the HTML content as a string first
     let htmlContent = `
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="font-size: 28px; font-weight: bold; margin: 0; color: #1e40af;">AIC SURFACES</h1>
+        <h1 style="font-size: 28px; font-weight: bold; margin: 0; color: #000;">AIC SURFACES</h1>
         <h2 style="font-size: 20px; margin: 10px 0; color: #333;">OPTIMIZED STONE QUOTE</h2>
         <p style="margin: 5px 0; color: #666;">Date: ${new Date().toLocaleDateString()}</p>
       </div>
       
       <div style="margin-bottom: 30px; padding: 15px; background-color: #f9fafb; border-radius: 8px;">
-        <h3 style="font-size: 18px; font-weight: bold; margin: 0 0 15px 0; color: #1e40af;">Customer Information</h3>
+        <h3 style="font-size: 18px; font-weight: bold; margin: 0 0 15px 0; color: #000;">Customer Information</h3>
         <table style="width: 100%;">
           <tr>
             <td style="padding: 5px 0;"><strong>Name:</strong></td>
@@ -538,7 +541,7 @@ export default function StoneTopEstimator() {
       </div>
       
       <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 18px; font-weight: bold; margin: 0 0 15px 0; color: #1e40af;">Quote Details</h3>
+        <h3 style="font-size: 18px; font-weight: bold; margin: 0 0 15px 0; color: #000;">Quote Details</h3>
         <table style="width: 100%; border-collapse: collapse; background-color: #fff;">
           <thead>
             <tr style="background-color: #e5e7eb;">
@@ -565,7 +568,7 @@ export default function StoneTopEstimator() {
               <td style="border: 1px solid #d1d5db; padding: 10px;">${p.edgeDetail}</td>
               <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.result?.totalSlabsNeeded || 0}</td>
               <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.result?.efficiency ? p.result.efficiency.toFixed(1) : '0'}%</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: right; font-weight: 600; color: #059669;">${p.result?.finalPrice ? p.result.finalPrice.toFixed(2) : '0.00'}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: right; font-weight: 600;">${p.result?.finalPrice ? p.result.finalPrice.toFixed(2) : '0.00'}</td>
             </tr>`;
       
       if (p.note) {
@@ -590,24 +593,24 @@ export default function StoneTopEstimator() {
           <tfoot>
             <tr style="background-color: #f3f4f6; font-weight: bold;">
               <td colspan="7" style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-size: 16px;">Total:</td>
-              <td style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-size: 16px; color: #059669;">${totalPrice.toFixed(2)}</td>
+              <td style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-size: 16px;">${totalPrice.toFixed(2)}</td>
             </tr>
           </tfoot>
         </table>
       </div>
       
       <div style="margin-top: 30px; display: flex; justify-content: space-around; text-align: center;">
-        <div style="padding: 20px; background-color: #dbeafe; border-radius: 8px; flex: 1; margin: 0 10px;">
-          <h4 style="margin: 0 0 10px 0; color: #1e40af; font-size: 14px;">Total Slabs</h4>
-          <p style="margin: 0; font-size: 24px; font-weight: bold; color: #1e40af;">${totalSlabs}</p>
+        <div style="padding: 20px; background-color: #f3f4f6; border-radius: 8px; flex: 1; margin: 0 10px;">
+          <h4 style="margin: 0 0 10px 0; color: #000; font-size: 14px;">Total Slabs</h4>
+          <p style="margin: 0; font-size: 24px; font-weight: bold; color: #000;">${totalSlabs}</p>
         </div>
-        <div style="padding: 20px; background-color: #d1fae5; border-radius: 8px; flex: 1; margin: 0 10px;">
-          <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 14px;">Avg Efficiency</h4>
-          <p style="margin: 0; font-size: 24px; font-weight: bold; color: #059669;">${avgEfficiency}%</p>
+        <div style="padding: 20px; background-color: #f3f4f6; border-radius: 8px; flex: 1; margin: 0 10px;">
+          <h4 style="margin: 0 0 10px 0; color: #000; font-size: 14px;">Avg Efficiency</h4>
+          <p style="margin: 0; font-size: 24px; font-weight: bold; color: #10b981;">${avgEfficiency}%</p>
         </div>
-        <div style="padding: 20px; background-color: #e9d5ff; border-radius: 8px; flex: 1; margin: 0 10px;">
-          <h4 style="margin: 0 0 10px 0; color: #7c3aed; font-size: 14px;">Status</h4>
-          <p style="margin: 0; font-size: 20px; font-weight: bold; color: #7c3aed;">Optimized</p>
+        <div style="padding: 20px; background-color: #f3f4f6; border-radius: 8px; flex: 1; margin: 0 10px;">
+          <h4 style="margin: 0 0 10px 0; color: #000; font-size: 14px;">Status</h4>
+          <p style="margin: 0; font-size: 20px; font-weight: bold; color: #000;">Optimized</p>
         </div>
       </div>
       
@@ -734,77 +737,97 @@ export default function StoneTopEstimator() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-6xl space-y-6 text-center">
-        
-        <div className="text-center mb-4">
-          {/* Remove or replace logo reference */}
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">AIC SURFACES</h1>
-          <h2 className="text-2xl font-semibold text-gray-700">Stone Estimator with Slab Optimization</h2>
-          <p className="text-base font-medium text-gray-600">Developed by Roy Kariok</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Modern Clean Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                AIC
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">AIC SURFACES</h1>
+                <p className="text-sm text-gray-500">Stone Estimator with Slab Optimization</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              {!adminMode && (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Admin Password"
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                  <button
+                    onClick={() => setAdminMode(adminPassword === correctPassword)}
+                    className="px-4 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Admin
+                  </button>
+                </div>
+              )}
+              <span className="text-sm text-gray-500">by Roy Kariok</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Progress Steps */}
+        <div className="flex justify-between items-center mb-8 px-8">
+          {['Settings', 'Products', 'Contact', 'Results'].map((step, index) => (
+            <div key={step} className="flex-1 relative">
+              {index < 3 && (
+                <div className="absolute top-5 left-1/2 w-full h-0.5 bg-gray-200 -z-10"></div>
+              )}
+              <div className="flex flex-col items-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
+                  index + 1 < currentStep ? 'bg-green-500 text-white' :
+                  index + 1 === currentStep ? 'bg-black text-white' :
+                  'bg-white border-2 border-gray-300 text-gray-400'
+                }`}>
+                  {index + 1 < currentStep ? '✓' : index + 1}
+                </div>
+                <span className={`mt-2 text-sm font-medium ${
+                  index + 1 <= currentStep ? 'text-gray-900' : 'text-gray-400'
+                }`}>
+                  {step}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {!adminMode && (
-          <div className="mb-4">
-            <input
-              type="password"
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-              placeholder="Admin Password"
-              className="border px-4 py-2 rounded"
-            />
-            <button
-              onClick={() => setAdminMode(adminPassword === correctPassword)}
-              className="ml-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Enter Admin Mode
-            </button>
-          </div>
-        )}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Settings Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Optimization Settings</h2>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                  <span className="text-sm font-medium text-gray-700">Include Kerf</span>
+                  <button
+                    onClick={() => setIncludeKerf(!includeKerf)}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${
+                      includeKerf ? 'bg-black' : 'bg-gray-300'
+                    }`}
+                  >
+                    <div className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform ${
+                      includeKerf ? 'translate-x-5' : 'translate-x-0.5'
+                    }`} />
+                  </button>
+                </div>
 
-        {/* Advanced Settings Panel */}
-        <div className="bg-blue-50 p-4 rounded shadow-md space-y-4 text-left">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-blue-800">Optimization Settings</h2>
-            <button
-              onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
-              className="text-blue-600 hover:text-blue-800 font-medium"
-            >
-              {showAdvancedSettings ? '▼ Hide Advanced' : '▶ Show Advanced'}
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="includeKerf"
-                checked={includeKerf}
-                onChange={(e) => setIncludeKerf(e.target.checked)}
-                className="w-4 h-4"
-              />
-              <label htmlFor="includeKerf" className="font-medium">
-                Include Kerf (Saw Blade Width)
-              </label>
-              {includeKerf && (
-                <span className="text-sm text-gray-600">({kerfWidth}")</span>
-              )}
-            </div>
-            
-            <div className="text-sm text-gray-600">
-              <strong>Current Mode:</strong> {includeKerf ? 'Production (with kerf)' : 'Theoretical (no kerf)'}
-            </div>
-          </div>
-
-          {showAdvancedSettings && (
-            <div className="border-t pt-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Kerf Width (inches)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Kerf Width</label>
                   <select
                     value={kerfWidth}
                     onChange={(e) => setKerfWidth(parseFloat(e.target.value))}
-                    className="border px-3 py-2 rounded w-full text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                     disabled={!includeKerf}
                   >
                     <option value={0.125}>1/8" (0.125) - Standard</option>
@@ -813,13 +836,13 @@ export default function StoneTopEstimator() {
                     <option value={0.09375}>3/32" (0.094) - Thin Blade</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium mb-1">Breakage Buffer (%)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Breakage Buffer</label>
                   <select
                     value={breakageBuffer}
                     onChange={(e) => setBreakageBuffer(parseInt(e.target.value))}
-                    className="border px-3 py-2 rounded w-full text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   >
                     <option value={5}>5% - Conservative</option>
                     <option value={10}>10% - Standard</option>
@@ -827,487 +850,485 @@ export default function StoneTopEstimator() {
                     <option value={20}>20% - Very High Risk</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium mb-1">Quick Presets</label>
-                  <select
-                    onChange={(e) => {
-                      const preset = e.target.value;
-                      if (preset === 'production') {
-                        setIncludeKerf(true);
-                        setKerfWidth(0.125);
-                        setBreakageBuffer(10);
-                      } else if (preset === 'theoretical') {
-                        setIncludeKerf(false);
-                        setBreakageBuffer(5);
-                      } else if (preset === 'conservative') {
-                        setIncludeKerf(true);
-                        setKerfWidth(0.1875);
-                        setBreakageBuffer(15);
-                      }
-                    }}
-                    className="border px-3 py-2 rounded w-full text-sm"
-                  >
-                    <option value="">Select Preset...</option>
-                    <option value="theoretical">Theoretical Maximum</option>
-                    <option value="production">Production Standard</option>
-                    <option value="conservative">Conservative Estimate</option>
-                  </select>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Quick Presets</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { name: 'Theoretical', action: () => { setIncludeKerf(false); setBreakageBuffer(5); }},
+                      { name: 'Production', action: () => { setIncludeKerf(true); setKerfWidth(0.125); setBreakageBuffer(10); }},
+                      { name: 'Conservative', action: () => { setIncludeKerf(true); setKerfWidth(0.1875); setBreakageBuffer(15); }}
+                    ].map((preset) => (
+                      <button
+                        key={preset.name}
+                        className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-black hover:text-white text-gray-700 rounded-md border border-gray-200 transition-colors"
+                        onClick={preset.action}
+                      >
+                        {preset.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">Visual Layouts</span>
+                    <button
+                      onClick={() => setShowVisualLayouts(!showVisualLayouts)}
+                      className={`relative w-11 h-6 rounded-full transition-colors ${
+                        showVisualLayouts ? 'bg-black' : 'bg-gray-300'
+                      }`}
+                    >
+                      <div className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform ${
+                        showVisualLayouts ? 'translate-x-5' : 'translate-x-0.5'
+                      }`} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
-        </div>
 
-        {products.map((product, index) => (
-          <div key={product.id} className="bg-gray-50 p-4 rounded shadow space-y-4 text-left relative">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-3">
-                <h3 className="font-semibold text-gray-700">
-                  {product.customName || `Product ${index + 1}`}
-                </h3>
-                {product.priority === 'high' && (
-                  <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">High Priority</span>
-                )}
-                {product.priority === 'low' && (
-                  <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Low Priority</span>
-                )}
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                {products.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeProduct(index)}
-                    className="text-red-600 font-bold text-xl hover:text-red-800"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4">
-              <select
-                value={product.stone}
-                onChange={(e) => updateProduct(index, 'stone', e.target.value)}
-                className="border px-4 py-2 rounded"
-              >
-                <option value="">Select Stone Type...</option>
-                {stoneOptions.map((stone, i) => (
-                  <option key={i} value={stone["Stone Type"]}>{stone["Stone Type"]}</option>
-                ))}
-              </select>
-              <input
-                type="number"
-                placeholder="Width (in)"
-                value={product.width}
-                onChange={(e) => updateProduct(index, 'width', e.target.value)}
-                className="border px-4 py-2 rounded"
-              />
-              <input
-                type="number"
-                placeholder="Depth (in)"
-                value={product.depth}
-                onChange={(e) => updateProduct(index, 'depth', e.target.value)}
-                className="border px-4 py-2 rounded"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <input
-                type="number"
-                placeholder="Quantity"
-                value={product.quantity}
-                onChange={(e) => updateProduct(index, 'quantity', e.target.value)}
-                className="border px-4 py-2 rounded"
-              />
-              <select
-                value={product.edgeDetail}
-                onChange={(e) => updateProduct(index, 'edgeDetail', e.target.value)}
-                className="border px-4 py-2 rounded"
-              >
-                <option value="Eased">Eased</option>
-                <option value="1.5 mitered">1.5" mitered</option>
-                <option value="Bullnose">Bullnose</option>
-                <option value="Ogee">Ogee</option>
-                <option value="Beveled">Beveled</option>
-              </select>
-              <div className="relative">
-                <input
-                  type="file"
-                  accept="image/*,.pdf,.dwg,.dxf"
-                  onChange={(e) => handleDrawingUpload(e, index)}
-                  className="border px-4 py-2 rounded w-full"
-                  disabled={loadingAI}
-                />
-                {loadingAI && (
-                  <div className="absolute inset-0 bg-blue-50 border-2 border-blue-200 border-dashed rounded flex items-center justify-center">
-                    <div className="text-blue-600 font-medium text-sm">
-                      🤖 AI analyzing...
+            {/* Summary Stats */}
+            {allResults.length > 0 && (
+              <div className="mt-6 bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                <h3 className="text-base font-semibold text-gray-900 mb-4">Current Estimate</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0)}
                     </div>
+                    <div className="text-xs text-gray-500 font-medium">Slabs</div>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {loadingAI && (
-              <div className="bg-blue-50 border border-blue-200 rounded p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                  <div>
-                    <div className="text-blue-800 font-medium">🤖 Claude AI is analyzing your drawing...</div>
-                    <div className="text-blue-600 text-sm">Extracting dimensions and identifying all pieces</div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {allResults.length > 0 ? 
+                        Math.round(allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length) : 
+                        0}%
+                    </div>
+                    <div className="text-xs text-gray-500 font-medium">Efficiency</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      ${(allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0) / 1000).toFixed(1)}k
+                    </div>
+                    <div className="text-xs text-gray-500 font-medium">Total</div>
                   </div>
                 </div>
               </div>
             )}
-
-            <textarea
-              placeholder="Notes (optional)"
-              value={product.note || ""}
-              onChange={(e) => updateProduct(index, 'note', e.target.value)}
-              className="w-full border p-2 rounded mt-2"
-              rows={2}
-            />
           </div>
-        ))}
 
-        <div className="flex flex-wrap gap-4 justify-center">
-          <button
-            onClick={addProduct}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Add Another Product
-          </button>
-          
-          <button
-            onClick={calculateAll}
-            className="px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700 font-semibold"
-          >
-            Calculate with Optimization
-          </button>
-          
-          {allResults.length > 0 && (
-            <>
-              <button
-                onClick={generatePDF}
-                className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold"
-              >
-                📄 Generate PDF
-              </button>
-              
-              <button
-                onClick={sendEmailToClient}
-                disabled={sendingEmail || !userInfo.email}
-                className={`px-6 py-3 text-white rounded font-semibold transition-all ${
-                  sendingEmail || !userInfo.email 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-purple-600 hover:bg-purple-700'
-                }`}
-              >
-                {sendingEmail ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Sending...
-                  </span>
-                ) : (
-                  '📧 Email Quote'
-                )}
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Email status message */}
-        {emailStatus && (
-          <div className={`mt-4 p-4 rounded-lg text-center font-medium animate-pulse ${
-            emailStatus.includes('✅') ? 'bg-green-100 text-green-800 border border-green-300' : 
-            emailStatus.includes('❌') ? 'bg-red-100 text-red-800 border border-red-300' : 
-            'bg-blue-100 text-blue-800 border border-blue-300'
-          }`}>
-            {emailStatus}
-          </div>
-        )}
-
-        {/* Contact Information */}
-        <div className="bg-gray-50 p-4 rounded shadow-md space-y-4 text-left">
-          <h2 className="text-lg font-semibold">Contact Information</h2>
-          {allResults.length > 0 && !userInfo.email && (
-            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded mb-4">
-              ⚠️ Email address is required to send quotes
-            </div>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input
-              type="text"
-              placeholder="Full Name *"
-              value={userInfo?.name || ""}
-              onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
-              className="border px-4 py-2 rounded w-full"
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email *"
-              value={userInfo?.email || ""}
-              onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-              className={`border px-4 py-2 rounded w-full ${
-                allResults.length > 0 && !userInfo.email ? 'border-red-500' : ''
-              }`}
-              required
-            />
-            <input
-              type="tel"
-              placeholder="Phone Number"
-              value={userInfo?.phone || ""}
-              onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
-              className="border px-4 py-2 rounded w-full"
-            />
-          </div>
-        </div>
-
-        {/* Results Section */}
-        {allResults.length > 0 && (
-          <div className="mt-6 w-full">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">
-                Optimized Results 
-                <span className="text-sm font-normal text-gray-600 ml-2">
-                  ({includeKerf ? `Production Mode (${kerfWidth}" kerf)` : 'Theoretical Mode (no kerf)'})
+          {/* Main Content */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Products Section */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">Products</h2>
+                <span className="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-md uppercase tracking-wide">
+                  {products.length} ITEMS
                 </span>
-              </h3>
+              </div>
+
+              <div className="space-y-4">
+                {products.map((product, index) => (
+                  <div key={product.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition-colors">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center space-x-3">
+                        <h3 className="text-base font-semibold text-gray-900">
+                          {product.customName || `Product ${index + 1}`}
+                        </h3>
+                        {product.priority === 'high' && (
+                          <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">High Priority</span>
+                        )}
+                        {product.priority === 'low' && (
+                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium">Low Priority</span>
+                        )}
+                      </div>
+                      {products.length > 1 && (
+                        <button
+                          onClick={() => removeProduct(index)}
+                          className="w-7 h-7 rounded-md bg-gray-100 hover:bg-red-500 hover:text-white text-gray-400 flex items-center justify-center transition-colors"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Stone Type</label>
+                        <select
+                          value={product.stone}
+                          onChange={(e) => updateProduct(index, 'stone', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                        >
+                          <option value="">Select Stone Type...</option>
+                          {stoneOptions.map((stone, i) => (
+                            <option key={i} value={stone["Stone Type"]}>{stone["Stone Type"]}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Width (in)</label>
+                          <input
+                            type="number"
+                            placeholder="0"
+                            value={product.width}
+                            onChange={(e) => updateProduct(index, 'width', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Depth (in)</label>
+                          <input
+                            type="number"
+                            placeholder="0"
+                            value={product.depth}
+                            onChange={(e) => updateProduct(index, 'depth', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                          <input
+                            type="number"
+                            placeholder="1"
+                            value={product.quantity}
+                            onChange={(e) => updateProduct(index, 'quantity', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Edge Detail</label>
+                          <select
+                            value={product.edgeDetail}
+                            onChange={(e) => updateProduct(index, 'edgeDetail', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                          >
+                            <option value="Eased">Eased</option>
+                            <option value="1.5 mitered">1.5" mitered</option>
+                            <option value="Bullnose">Bullnose</option>
+                            <option value="Ogee">Ogee</option>
+                            <option value="Beveled">Beveled</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                          <select
+                            value={product.priority}
+                            onChange={(e) => updateProduct(index, 'priority', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                          >
+                            <option value="normal">Normal</option>
+                            <option value="high">High</option>
+                            <option value="low">Low</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
+                        <textarea
+                          placeholder="Add any special instructions..."
+                          value={product.note}
+                          onChange={(e) => updateProduct(index, 'note', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                          rows={2}
+                        />
+                      </div>
+
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept="image/*,.pdf,.dwg,.dxf"
+                          onChange={(e) => handleDrawingUpload(e, index)}
+                          className="hidden"
+                          id={`file-upload-${index}`}
+                          disabled={loadingAI}
+                        />
+                        <label
+                          htmlFor={`file-upload-${index}`}
+                          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer block ${
+                            loadingAI ? 'border-gray-200 bg-gray-50' : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                        >
+                          {loadingAI ? (
+                            <div className="flex items-center justify-center space-x-3">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black"></div>
+                              <div className="text-gray-700 font-medium">🤖 AI analyzing...</div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="text-gray-400 text-2xl mb-1">📎</div>
+                              <div className="text-sm text-gray-600 font-medium">Upload drawing (optional)</div>
+                              <div className="text-xs text-gray-500 mt-1">AI will extract dimensions automatically</div>
+                            </>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={addProduct}
+                className="w-full mt-4 px-4 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+              >
+                <span className="text-lg">+</span> Add Product
+              </button>
+            </div>
+
+            {/* Contact Information */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h2>
               
-              <div className="flex items-center space-x-3">
-                <label className="flex items-center space-x-2 text-sm font-medium">
+              {allResults.length > 0 && !userInfo.email && (
+                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800 font-medium">⚠️ Email address is required to send quotes</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                   <input
-                    type="checkbox"
-                    checked={showVisualLayouts}
-                    onChange={(e) => setShowVisualLayouts(e.target.checked)}
-                    className="w-4 h-4"
+                    type="text"
+                    placeholder="Enter name"
+                    value={userInfo.name}
+                    onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   />
-                  <span>Show Visual Layouts</span>
-                </label>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    placeholder="Enter email"
+                    value={userInfo.email}
+                    onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${
+                      allResults.length > 0 && !userInfo.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    placeholder="Enter phone"
+                    value={userInfo.phone}
+                    onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Visual Layouts */}
-            {showVisualLayouts && (
-              <div className="mb-6 space-y-6">
-                {allResults.map((product, productIndex) => {
-                  if (!product.result) return null;
-                  
-                  const stone = stoneOptions.find(s => s["Stone Type"] === product.stone);
-                  const slabWidth = parseFloat(stone?.["Slab Width"]) || 126;
-                  const slabHeight = parseFloat(stone?.["Slab Height"]) || 63;
-                  
-                  return (
-                    <div key={productIndex} className="bg-white p-4 rounded border">
-                      <h4 className="font-semibold text-gray-800 mb-3">
-                        Layout Preview: {product.customName || `Product ${productIndex + 1}`} - {product.stone} ({product.width}x{product.depth})
-                      </h4>
-                      
-                      <div className="flex flex-col lg:flex-row gap-6">
-                        <div className="flex-1">
-                          <SlabLayoutVisualization 
-                            pieces={Array(Math.min(parseInt(product.quantity) || 1, product.result.topsPerSlab)).fill().map((_, i) => ({
-                              id: i + 1,
-                              width: parseFloat(product.width) || 0,
-                              depth: parseFloat(product.depth) || 0,
-                              name: `${product.stone} #${i + 1}`
-                            }))}
-                            slabWidth={slabWidth}
-                            slabHeight={slabHeight}
-                            maxPiecesPerSlab={product.result.topsPerSlab}
-                            includeKerf={includeKerf}
-                            kerfWidth={kerfWidth}
-                          />
-                        </div>
+            {/* Results Section */}
+            {allResults.length > 0 && showVisualLayouts && (
+              <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Layout Visualization</h2>
+                <div className="space-y-6">
+                  {allResults.map((product, index) => {
+                    if (!product.result) return null;
+                    const stone = stoneOptions.find(s => s["Stone Type"] === product.stone);
+                    const slabWidth = parseFloat(stone?.["Slab Width"]) || 126;
+                    const slabHeight = parseFloat(stone?.["Slab Height"]) || 63;
+                    
+                    return (
+                      <div key={index} className="bg-gray-50 rounded-xl p-4">
+                        <h4 className="font-semibold text-gray-800 mb-3">
+                          {product.customName || `Product ${index + 1}`} - {product.stone} ({product.width}×{product.depth})
+                        </h4>
                         
-                        <div className="w-full lg:w-64 bg-gray-50 p-4 rounded">
-                          <h5 className="font-semibold mb-3">Layout Analysis</h5>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex items-center space-x-2">
-                              <div className="w-4 h-4 bg-blue-200 border-2 border-blue-600"></div>
-                              <span>Vertical: {product.width}x{product.depth}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <div className="w-4 h-4 bg-orange-200 border-2 border-orange-600"></div>
-                              <span>Horizontal: {product.depth}x{product.width}</span>
-                            </div>
-                            {includeKerf && (
+                        <div className="flex flex-col lg:flex-row gap-6">
+                          <div className="flex-1">
+                            <SlabLayoutVisualization
+                              pieces={Array(Math.min(parseInt(product.quantity) || 1, product.result.topsPerSlab)).fill().map((_, i) => ({
+                                id: i + 1,
+                                width: parseFloat(product.width) || 0,
+                                depth: parseFloat(product.depth) || 0,
+                                name: `${product.stone} #${i + 1}`
+                              }))}
+                              slabWidth={slabWidth}
+                              slabHeight={slabHeight}
+                              maxPiecesPerSlab={product.result.topsPerSlab}
+                              includeKerf={includeKerf}
+                              kerfWidth={kerfWidth}
+                            />
+                          </div>
+                          
+                          <div className="w-full lg:w-64 bg-white p-4 rounded-lg border border-gray-200">
+                            <h5 className="font-semibold mb-3 text-gray-800">Layout Analysis</h5>
+                            <div className="space-y-2 text-sm">
                               <div className="flex items-center space-x-2">
-                                <div className="w-4 h-4 bg-red-200 border border-red-400"></div>
-                                <span>Kerf: {kerfWidth}"</span>
+                                <div className="w-4 h-4 bg-gray-100 border-2 border-gray-400 rounded"></div>
+                                <span>Vertical: {product.width}×{product.depth}</span>
                               </div>
-                            )}
-                            
-                            <div className="pt-2 border-t space-y-1">
-                              <div><strong>Max Pieces/Slab:</strong> {product.result.topsPerSlab}</div>
-                              <div><strong>Total Quantity:</strong> {product.quantity}</div>
-                              <div><strong>Efficiency:</strong> <span className="text-green-600 font-semibold">{product.result.efficiency?.toFixed(1) || '0'}%</span></div>
-                              <div><strong>Slabs Needed:</strong> {product.result.totalSlabsNeeded}</div>
-                              
-                              {product.priority && product.priority !== 'normal' && (
-                                <div className="pt-1">
-                                  <strong>Priority:</strong> 
-                                  <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
-                                    product.priority === 'high' ? 'bg-red-100 text-red-800' :
-                                    'bg-gray-100 text-gray-600'
-                                  }`}>
-                                    {product.priority === 'high' ? 'High' : 'Low'}
-                                  </span>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-4 h-4 bg-gray-200 border-2 border-gray-500 rounded"></div>
+                                <span>Horizontal: {product.depth}×{product.width}</span>
+                              </div>
+                              {includeKerf && (
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-4 h-4 bg-red-200 border border-red-400 rounded"></div>
+                                  <span>Kerf: {kerfWidth}"</span>
                                 </div>
                               )}
+                              
+                              <div className="pt-2 border-t space-y-1">
+                                <div><strong>Max Pieces/Slab:</strong> {product.result.topsPerSlab}</div>
+                                <div><strong>Total Quantity:</strong> {product.quantity}</div>
+                                <div><strong>Efficiency:</strong> <span className="text-green-600 font-semibold">{product.result.efficiency?.toFixed(1) || '0'}%</span></div>
+                                <div><strong>Slabs Needed:</strong> {product.result.totalSlabsNeeded}</div>
+                              </div>
                             </div>
                           </div>
                         </div>
+                        
+                        {product.note && (
+                          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <strong className="text-yellow-800">Notes:</strong>
+                            <p className="text-sm text-yellow-700 mt-1">{product.note}</p>
+                          </div>
+                        )}
                       </div>
-                      
-                      {product.note && (
-                        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                          <strong className="text-yellow-800">Notes:</strong>
-                          <p className="text-sm text-yellow-700 mt-1">{product.note}</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             )}
 
-            {/* Results Table - UPDATED RESPONSIVE VERSION */}
-            <div className="overflow-hidden">
-              <table className="w-full border-collapse border text-xs">
-                <thead>
-                  <tr className="bg-gray-200">
-                    <th className="border px-2 py-2 text-left">Product</th>
-                    <th className="border px-2 py-2">Stone</th>
-                    <th className="border px-2 py-2">Size</th>
-                    <th className="border px-2 py-2">Qty</th>
-                    <th className="border px-2 py-2 hidden md:table-cell">Edge</th>
-                    <th className="border px-2 py-2 hidden lg:table-cell">Area</th>
-                    <th className="border px-2 py-2">Per Slab</th>
-                    <th className="border px-2 py-2">Slabs</th>
-                    <th className="border px-2 py-2">Eff %</th>
-                    <th className="border px-2 py-2 hidden md:table-cell">Material</th>
-                    <th className="border px-2 py-2 hidden md:table-cell">Fab</th>
-                    <th className="border px-2 py-2 hidden lg:table-cell">Cost</th>
-                    <th className="border px-2 py-2 font-bold">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allResults.map((p, i) => (
-                    <tr key={i} className="text-center hover:bg-gray-50">
-                      <td className="border px-2 py-2 text-left">
-                        <div className="font-medium text-xs">
-                          {p.customName || `Product ${i + 1}`}
-                        </div>
-                        {p.note && (
-                          <div className="text-xs text-gray-600 mt-1 hidden xl:block">{p.note}</div>
-                        )}
-                      </td>
-                      <td className="border px-2 py-2 text-xs">{p.stone}</td>
-                      <td className="border px-2 py-2 text-xs">{p.width}×{p.depth}</td>
-                      <td className="border px-2 py-2">{p.quantity}</td>
-                      <td className="border px-2 py-2 text-xs hidden md:table-cell">{p.edgeDetail}</td>
-                      <td className="border px-2 py-2 hidden lg:table-cell">{p.result?.usableAreaSqft?.toFixed(1)}</td>
-                      <td className="border px-2 py-2 font-semibold text-purple-600">
-                        {p.result?.topsPerSlab || '-'}
-                      </td>
-                      <td className="border px-2 py-2 font-semibold text-blue-600">
-                        {p.result?.totalSlabsNeeded || '-'}
-                      </td>
-                      <td className="border px-2 py-2">
-                        <span className={`font-semibold ${
-                          (p.result?.efficiency || 0) > 80 ? 'text-green-600' : 
-                          (p.result?.efficiency || 0) > 60 ? 'text-yellow-600' : 'text-red-600'
-                        }`}>
-                          {p.result?.efficiency?.toFixed(0) || '0'}
-                        </span>
-                      </td>
-                      <td className="border px-2 py-2 text-xs hidden md:table-cell">
-                        ${p.result?.materialCost?.toFixed(0) || '0'}
-                      </td>
-                      <td className="border px-2 py-2 text-xs hidden md:table-cell">
-                        ${p.result?.fabricationCost?.toFixed(0) || '0'}
-                      </td>
-                      <td className="border px-2 py-2 text-xs hidden lg:table-cell">
-                        ${p.result?.rawCost?.toFixed(0) || '0'}
-                      </td>
-                      <td className="border px-2 py-2 font-bold text-green-600">
-                        ${p.result?.finalPrice?.toFixed(0) || '0'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-gray-100 font-bold">
-                    <td colSpan={9} className="border px-2 py-2 text-right">Totals:</td>
-                    <td className="border px-2 py-2 text-center text-blue-700 hidden md:table-cell">
-                      ${allResults.reduce((sum, p) => sum + (p.result?.materialCost || 0), 0).toFixed(0)}
-                    </td>
-                    <td className="border px-2 py-2 text-center text-orange-600 hidden md:table-cell">
-                      ${allResults.reduce((sum, p) => sum + (p.result?.fabricationCost || 0), 0).toFixed(0)}
-                    </td>
-                    <td className="border px-2 py-2 text-center text-gray-700 hidden lg:table-cell">
-                      ${allResults.reduce((sum, p) => sum + (p.result?.rawCost || 0), 0).toFixed(0)}
-                    </td>
-                    <td className="border px-2 py-2 text-center text-green-600 text-sm">
-                      ${allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2)}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-
-            {/* Mobile-Friendly Summary Cards (shown on small screens) */}
-            <div className="md:hidden mt-4 space-y-3">
-              {allResults.map((p, i) => (
-                <div key={i} className="bg-white p-4 rounded-lg border shadow-sm">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold">{p.customName || `Product ${i + 1}`}</h4>
-                    <span className="text-green-600 font-bold">${p.result?.finalPrice?.toFixed(0)}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                    <div>Stone: {p.stone}</div>
-                    <div>Size: {p.width}×{p.depth}</div>
-                    <div>Quantity: {p.quantity}</div>
-                    <div>Slabs: {p.result?.totalSlabsNeeded || '-'}</div>
-                    <div>Per Slab: {p.result?.topsPerSlab || '-'}</div>
-                    <div>Efficiency: {p.result?.efficiency?.toFixed(0) || '0'}%</div>
-                  </div>
-                  {p.note && <div className="mt-2 text-xs text-gray-500">{p.note}</div>}
+            {/* Results Table */}
+            {allResults.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Calculation Results</h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-2 font-medium text-gray-700">Product</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-700">Stone</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Size</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Qty</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Slabs</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Eff %</th>
+                        <th className="text-right py-3 px-2 font-medium text-gray-700">Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allResults.map((p, i) => (
+                        <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-2">
+                            <div className="font-medium text-gray-900">{p.customName || `Product ${i + 1}`}</div>
+                            {p.note && <div className="text-xs text-gray-500 mt-0.5">{p.note}</div>}
+                          </td>
+                          <td className="py-3 px-2 text-gray-600">{p.stone}</td>
+                          <td className="py-3 px-2 text-center text-gray-600">{p.width}×{p.depth}</td>
+                          <td className="py-3 px-2 text-center text-gray-600">{p.quantity}</td>
+                          <td className="py-3 px-2 text-center font-semibold text-gray-900">{p.result?.totalSlabsNeeded || '-'}</td>
+                          <td className="py-3 px-2 text-center">
+                            <span className={`font-semibold ${
+                              (p.result?.efficiency || 0) > 80 ? 'text-green-600' : 
+                              (p.result?.efficiency || 0) > 60 ? 'text-yellow-600' : 'text-red-600'
+                            }`}>
+                              {p.result?.efficiency?.toFixed(0) || '0'}%
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-right font-semibold text-gray-900">
+                            ${p.result?.finalPrice?.toFixed(2) || '0.00'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-gray-200">
+                        <td colSpan={6} className="py-3 px-2 text-right font-semibold text-gray-700">Total:</td>
+                        <td className="py-3 px-2 text-right font-bold text-lg text-gray-900">
+                          ${allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
                 </div>
-              ))}
-            </div>
 
-            {/* Summary Statistics */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-blue-50 p-4 rounded">
-                <h4 className="font-semibold text-blue-800">Total Slabs Needed</h4>
-                <p className="text-2xl font-bold text-blue-600">
-                  {allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0)}
-                </p>
+                {/* Summary Cards */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-xl text-center">
+                    <h4 className="text-sm font-medium text-gray-600">Total Slabs Needed</h4>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">
+                      {allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0)}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl text-center">
+                    <h4 className="text-sm font-medium text-gray-600">Average Efficiency</h4>
+                    <p className="text-2xl font-bold text-green-600 mt-1">
+                      {allResults.length > 0 ? 
+                        (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : 
+                        '0'
+                      }%
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl text-center">
+                    <h4 className="text-sm font-medium text-gray-600">Material Savings</h4>
+                    <p className="text-xl font-bold text-gray-900 mt-1">Optimized!</p>
+                    <p className="text-xs text-gray-500">vs. Standard Calculation</p>
+                  </div>
+                </div>
               </div>
-              <div className="bg-green-50 p-4 rounded">
-                <h4 className="font-semibold text-green-800">Average Efficiency</h4>
-                <p className="text-2xl font-bold text-green-600">
-                  {allResults.length > 0 ? 
-                    (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : 
-                    '0'
-                  }%
-                </p>
-              </div>
-              <div className="bg-purple-50 p-4 rounded">
-                <h4 className="font-semibold text-purple-800">Material Savings</h4>
-                <p className="text-sm text-purple-600">vs. Standard Calculation</p>
-                <p className="text-xl font-bold text-purple-600">Optimized!</p>
-              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Sticky Action Bar */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-center gap-3">
+              {allResults.length > 0 && (
+                <>
+                  <button
+                    onClick={generatePDF}
+                    className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"
+                  >
+                    <span>📄</span> Generate PDF
+                  </button>
+                  <button
+                    onClick={sendEmailToClient}
+                    disabled={sendingEmail || !userInfo.email}
+                    className={`px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                      sendingEmail || !userInfo.email
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <span>📧</span> {sendingEmail ? 'Sending...' : 'Email Quote'}
+                  </button>
+                </>
+              )}
+              <button
+                onClick={calculateAll}
+                className="px-8 py-2.5 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+              >
+                <span>⚡</span> Calculate Optimization
+              </button>
             </div>
+          </div>
+        </div>
+
+        {/* Email Status */}
+        {emailStatus && (
+          <div className={`fixed bottom-20 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg transition-all ${
+            emailStatus.includes('✅') ? 'bg-green-500 text-white' :
+            emailStatus.includes('❌') ? 'bg-red-500 text-white' :
+            'bg-gray-800 text-white'
+          }`}>
+            {emailStatus}
           </div>
         )}
       </div>
