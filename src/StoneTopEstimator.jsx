@@ -903,9 +903,11 @@ export default function StoneTopEstimator() {
         <header className="bg-white border-b border-[#D8E3E9]">
           <div className="max-w-[1400px] mx-auto px-8 py-4 flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-[#0A4F63] flex items-center justify-center text-[#40E0D0] font-bold text-lg font-serif">
-                AIC
-              </div>
+              <img 
+                src="/AIC.jpg" 
+                alt="AIC Logo" 
+                className="w-10 h-10 object-cover rounded"
+              />
               <div>
                 <h1 className="text-xl font-bold text-[#0A4F63] font-serif tracking-wide">AIC Surfaces</h1>
                 <p className="text-xs text-[#5A8FA0] uppercase tracking-wider">Premium Stone Fabrication</p>
