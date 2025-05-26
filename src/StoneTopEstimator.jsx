@@ -154,7 +154,10 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
       </div>
       
       <div className="mt-2 text-xs text-gray-500 text-center">
-        Showing {layoutPieces.length} of {maxPiecesPerSlab} maximum pieces per slab
+        {pieces.length < maxPiecesPerSlab ? 
+          `Showing ${layoutPieces.length} of ${pieces.length} pieces ordered (max ${maxPiecesPerSlab}/slab)` :
+          `Showing ${layoutPieces.length} pieces (max capacity per slab)`
+        }
       </div>
     </div>
   );
@@ -834,7 +837,7 @@ export default function StoneTopEstimator() {
                 
                 <div className="text-center p-8 bg-[#F0F4F7] border border-[#D8E3E9]">
                   <SlabLayoutVisualization 
-                    pieces={Array(product.result.topsPerSlab).fill().map((_, i) => ({
+                    pieces={Array(Math.min(parseInt(product.quantity) || 1, product.result.topsPerSlab)).fill().map((_, i) => ({
                       id: i + 1,
                       width: parseFloat(product.width) || 0,
                       depth: parseFloat(product.depth) || 0,
@@ -845,7 +848,7 @@ export default function StoneTopEstimator() {
                     maxPiecesPerSlab={product.result.topsPerSlab}
                     includeKerf={includeKerf}
                     kerfWidth={kerfWidth}
-                    showMaxLayout={true}
+                    showMaxLayout={false}
                   />
                 </div>
                 
