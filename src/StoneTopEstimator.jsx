@@ -206,31 +206,6 @@ export default function StoneTopEstimator() {
   const [quoteName, setQuoteName] = useState('');
 
   useEffect(() => {
-    // Load html2pdf from CDN with error handling
-    const loadHtml2Pdf = async () => {
-      try {
-        // Check if already loaded
-        if (window.html2pdf) {
-          console.log('html2pdf already loaded');
-          return;
-        }
-
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-        script.onload = () => {
-          console.log('html2pdf loaded successfully');
-        };
-        script.onerror = () => {
-          console.error('Failed to load html2pdf');
-        };
-        document.head.appendChild(script);
-      } catch (error) {
-        console.error('Error loading html2pdf:', error);
-      }
-    };
-
-    loadHtml2Pdf();
-
     // Load saved quotes from localStorage
     const saved = localStorage.getItem('aicSavedQuotes');
     if (saved) {
@@ -1097,7 +1072,10 @@ export default function StoneTopEstimator() {
           {/* Action Buttons */}
           <div className="flex justify-center gap-4 mt-8 pb-16">
             <button
-              onClick={generatePDF}
+              onClick={() => {
+                console.log('PDF button clicked!');
+                generateQuotePDF();
+              }}
               className="px-6 py-2 bg-white text-[#0A4F63] border border-[#D8E3E9] text-xs font-medium uppercase tracking-wider hover:border-[#40E0D0] hover:text-[#40E0D0] transition-all"
             >
               📄 Generate PDF
