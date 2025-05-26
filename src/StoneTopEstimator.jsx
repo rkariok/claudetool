@@ -200,11 +200,22 @@ export default function StoneTopEstimator() {
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailStatus, setEmailStatus] = useState('');
 
+  // Add save/load state
+  const [savedQuotes, setSavedQuotes] = useState([]);
+  const [showSavedQuotes, setShowSavedQuotes] = useState(false);
+  const [quoteName, setQuoteName] = useState('');
+
   useEffect(() => {
     // Load html2pdf from CDN
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
     document.head.appendChild(script);
+
+    // Load saved quotes from localStorage
+    const saved = localStorage.getItem('aicSavedQuotes');
+    if (saved) {
+      setSavedQuotes(JSON.parse(saved));
+    }
 
     fetch("https://opensheet.elk.sh/1g8w934dZH-NEuKfK8wg_RZYiXyLSSf87H0Xwec6KAAc/Sheet1")
       .then((res) => res.json())
@@ -219,6 +230,52 @@ export default function StoneTopEstimator() {
         setStoneOptions([]);
       });
   }, []);
+
+  // Save quote function
+  const saveQuote = () => {
+    const quoteName = prompt('Enter a name for this quote:');
+    if (!quoteName) return;
+
+    const quoteData = {
+      id: Date.now(),
+      name: quoteName,
+      date: new Date().toISOString(),
+      userInfo,
+      products: products.map(p => ({...p, result: null})), // Don't save results
+      settings: {
+        includeKerf,
+        kerfWidth,
+        breakageBuffer,
+        showVisualLayouts
+      }
+    };
+
+    const newSavedQuotes = [...savedQuotes, quoteData];
+    setSavedQuotes(newSavedQuotes);
+    localStorage.setItem('aicSavedQuotes', JSON.stringify(newSavedQuotes));
+    alert('Quote saved successfully!');
+  };
+
+  // Load quote function
+  const loadQuote = (quote) => {
+    setUserInfo(quote.userInfo);
+    setProducts(quote.products);
+    setIncludeKerf(quote.settings.includeKerf);
+    setKerfWidth(quote.settings.kerfWidth);
+    setBreakageBuffer(quote.settings.breakageBuffer);
+    setShowVisualLayouts(quote.settings.showVisualLayouts);
+    setShowSavedQuotes(false);
+    alert('Quote loaded successfully!');
+  };
+
+  // Delete quote function
+  const deleteQuote = (quoteId) => {
+    if (confirm('Are you sure you want to delete this quote?')) {
+      const newSavedQuotes = savedQuotes.filter(q => q.id !== quoteId);
+      setSavedQuotes(newSavedQuotes);
+      localStorage.setItem('aicSavedQuotes', JSON.stringify(newSavedQuotes));
+    }
+  };
 
   // Calculate maximum pieces that can fit per slab with optimal mixed orientations
   const calculateMaxPiecesPerSlab = (pieceW, pieceH, slabW, slabH) => {
@@ -509,7 +566,7 @@ export default function StoneTopEstimator() {
     setShowResults(true);
   };
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     if (allResults.length === 0) {
       alert("Please calculate estimates first");
       return;
@@ -529,9 +586,16 @@ export default function StoneTopEstimator() {
     element.style.backgroundColor = '#fff';
     element.style.width = '210mm'; // A4 width
     
-    // Build the HTML content as a string first
+    // Calculate totals
+    const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0);
+    const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
+    const avgEfficiency = allResults.length > 0 ? 
+      (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
+    
+    // Build the HTML content
     let htmlContent = `
       <div style="text-align: center; margin-bottom: 30px;">
+        <img src="/aic.jpg" alt="AIC Logo" style="width: 120px; height: auto; margin-bottom: 20px;" />
         <h1 style="font-size: 28px; font-weight: bold; margin: 0; color: #1e40af;">AIC SURFACES</h1>
         <h2 style="font-size: 20px; margin: 10px 0; color: #333;">OPTIMIZED STONE QUOTE</h2>
         <p style="margin: 5px 0; color: #666;">Date: ${new Date().toLocaleDateString()}</p>
@@ -583,7 +647,7 @@ export default function StoneTopEstimator() {
               <td style="border: 1px solid #d1d5db; padding: 10px;">${p.edgeDetail}</td>
               <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.result?.totalSlabsNeeded || 0}</td>
               <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.result?.efficiency ? p.result.efficiency.toFixed(1) : '0'}%</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: right; font-weight: 600; color: #059669;">${p.result?.finalPrice ? p.result.finalPrice.toFixed(2) : '0.00'}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: right; font-weight: 600; color: #059669;">$${p.result?.finalPrice ? p.result.finalPrice.toFixed(2) : '0.00'}</td>
             </tr>`;
       
       if (p.note) {
@@ -596,19 +660,13 @@ export default function StoneTopEstimator() {
       }
     });
     
-    // Calculate totals
-    const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0);
-    const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
-    const avgEfficiency = allResults.length > 0 ? 
-      (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
-    
     // Add totals row
     htmlContent += `
           </tbody>
           <tfoot>
             <tr style="background-color: #f3f4f6; font-weight: bold;">
               <td colspan="7" style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-size: 16px;">Total:</td>
-              <td style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-size: 16px; color: #059669;">${totalPrice.toFixed(2)}</td>
+              <td style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-size: 16px; color: #059669;">$${totalPrice.toFixed(2)}</td>
             </tr>
           </tfoot>
         </table>
@@ -639,8 +697,21 @@ export default function StoneTopEstimator() {
     // Set the HTML content
     element.innerHTML = htmlContent;
     
-    // Append to body temporarily (helps with rendering)
+    // Append to body temporarily
     document.body.appendChild(element);
+    
+    // Wait for image to load
+    const img = element.querySelector('img');
+    if (img) {
+      await new Promise((resolve) => {
+        if (img.complete) {
+          resolve();
+        } else {
+          img.onload = resolve;
+          img.onerror = resolve; // Continue even if image fails
+        }
+      });
+    }
     
     // PDF options
     const opt = {
@@ -650,6 +721,7 @@ export default function StoneTopEstimator() {
       html2canvas: { 
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         logging: false,
         windowWidth: element.scrollWidth,
         windowHeight: element.scrollHeight
@@ -664,19 +736,17 @@ export default function StoneTopEstimator() {
     };
     
     // Generate PDF
-    window.html2pdf()
-      .from(element)
-      .set(opt)
-      .save()
-      .then(() => {
-        // Remove the element from body after PDF is generated
-        document.body.removeChild(element);
-      })
-      .catch((error) => {
-        console.error('PDF generation error:', error);
-        document.body.removeChild(element);
-        alert('Failed to generate PDF. Please try again.');
-      });
+    try {
+      await window.html2pdf()
+        .from(element)
+        .set(opt)
+        .save();
+      document.body.removeChild(element);
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      document.body.removeChild(element);
+      alert('Failed to generate PDF. Please try again.');
+    }
   };
 
   // EmailJS implementation - NO API NEEDED!
@@ -766,6 +836,76 @@ export default function StoneTopEstimator() {
       />
     </div>
   );
+
+  // Saved Quotes Modal
+  if (showSavedQuotes) {
+    return (
+      <div className="min-h-screen bg-[#F0F4F7]">
+        <header className="bg-white border-b border-[#D8E3E9]">
+          <div className="max-w-[1400px] mx-auto px-8 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-[#0A4F63] flex items-center justify-center text-[#40E0D0] font-bold text-lg font-serif">
+                AIC
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-[#0A4F63] font-serif tracking-wide">AIC Surfaces</h1>
+                <p className="text-xs text-[#5A8FA0] uppercase tracking-wider">Saved Quotes</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-[1400px] mx-auto p-8">
+          <button
+            onClick={() => setShowSavedQuotes(false)}
+            className="flex items-center gap-2 px-4 py-2 border border-[#D8E3E9] text-[#0A4F63] text-xs font-medium hover:border-[#40E0D0] hover:text-[#40E0D0] transition-all mb-6"
+          >
+            ← Back to Estimator
+          </button>
+
+          <h2 className="text-2xl font-serif mb-6 text-[#0A4F63]">Saved Quotes</h2>
+
+          {savedQuotes.length === 0 ? (
+            <div className="bg-white border border-[#D8E3E9] p-8 text-center">
+              <p className="text-[#5A8FA0]">No saved quotes found.</p>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {savedQuotes.map((quote) => (
+                <div key={quote.id} className="bg-white border border-[#D8E3E9] p-6 hover:border-[#40E0D0] transition-all">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#0A4F63]">{quote.name}</h3>
+                      <p className="text-sm text-[#5A8FA0]">
+                        Saved on: {new Date(quote.date).toLocaleDateString()} at {new Date(quote.date).toLocaleTimeString()}
+                      </p>
+                      <p className="text-sm text-[#5A8FA0] mt-1">
+                        Customer: {quote.userInfo.name || 'N/A'} | Products: {quote.products.length}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => loadQuote(quote)}
+                        className="px-4 py-2 bg-[#0A4F63] text-[#40E0D0] text-xs font-medium uppercase tracking-wider hover:bg-[#40E0D0] hover:text-[#0A4F63] transition-all"
+                      >
+                        Load
+                      </button>
+                      <button
+                        onClick={() => deleteQuote(quote.id)}
+                        className="px-4 py-2 border border-red-500 text-red-500 text-xs font-medium uppercase tracking-wider hover:bg-red-500 hover:text-white transition-all"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (showResults) {
     return (
@@ -978,13 +1118,29 @@ export default function StoneTopEstimator() {
       <header className="bg-white border-b border-[#D8E3E9]">
         <div className="max-w-[1400px] mx-auto px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-[#0A4F63] flex items-center justify-center text-[#40E0D0] font-bold text-lg font-serif">
-              AIC
-            </div>
+            <img 
+              src="/aic.jpg" 
+              alt="AIC Logo" 
+              className="w-10 h-10 object-cover rounded"
+            />
             <div>
               <h1 className="text-xl font-bold text-[#0A4F63] font-serif tracking-wide">AIC Surfaces</h1>
               <p className="text-xs text-[#5A8FA0] uppercase tracking-wider">Premium Stone Fabrication</p>
             </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={saveQuote}
+              className="px-4 py-2 bg-white text-[#0A4F63] border border-[#D8E3E9] text-xs font-medium uppercase tracking-wider hover:border-[#40E0D0] hover:text-[#40E0D0] transition-all"
+            >
+              💾 Save Quote
+            </button>
+            <button
+              onClick={() => setShowSavedQuotes(true)}
+              className="px-4 py-2 bg-white text-[#0A4F63] border border-[#D8E3E9] text-xs font-medium uppercase tracking-wider hover:border-[#40E0D0] hover:text-[#40E0D0] transition-all"
+            >
+              📂 Load Quote ({savedQuotes.length})
+            </button>
           </div>
         </div>
       </header>
@@ -1277,20 +1433,22 @@ export default function StoneTopEstimator() {
 
       {/* Admin Mode */}
       {!adminMode && (
-        <div className="fixed top-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-[#D8E3E9]">
-          <input
-            type="password"
-            value={adminPassword}
-            onChange={(e) => setAdminPassword(e.target.value)}
-            placeholder="Admin Password"
-            className="px-3 py-2 border border-[#D8E3E9] text-xs mr-2 focus:outline-none focus:border-[#40E0D0]"
-          />
-          <button
-            onClick={() => setAdminMode(adminPassword === correctPassword)}
-            className="px-4 py-2 bg-[#0A4F63] text-[#40E0D0] text-xs font-medium uppercase tracking-wider hover:bg-[#40E0D0] hover:text-[#0A4F63] transition-all"
-          >
-            Enter
-          </button>
+        <div className="fixed bottom-4 left-4 bg-white p-4 rounded-lg shadow-lg border border-[#D8E3E9] z-50">
+          <div className="flex items-center gap-2">
+            <input
+              type="password"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              placeholder="Admin Password"
+              className="px-3 py-2 border border-[#D8E3E9] text-xs focus:outline-none focus:border-[#40E0D0]"
+            />
+            <button
+              onClick={() => setAdminMode(adminPassword === correctPassword)}
+              className="px-4 py-2 bg-[#0A4F63] text-[#40E0D0] text-xs font-medium uppercase tracking-wider hover:bg-[#40E0D0] hover:text-[#0A4F63] transition-all"
+            >
+              Enter
+            </button>
+          </div>
         </div>
       )}
     </div>
