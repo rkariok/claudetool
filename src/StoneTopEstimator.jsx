@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 // Slab Layout Visualization Component
-const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSlab, includeKerf, kerfWidth }) => {
+const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSlab, includeKerf, kerfWidth, showMaxLayout = false }) => {
   if (!pieces || pieces.length === 0) return null;
 
   const pieceWidth = pieces[0]?.width || 0;
@@ -10,17 +10,23 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
 
   const generateOptimalLayout = () => {
     const layout = [];
-    const targetPieces = Math.min(pieces.length, maxPiecesPerSlab);
+    // Show the maximum pieces that can fit if showMaxLayout is true
+    const targetPieces = showMaxLayout ? maxPiecesPerSlab : Math.min(pieces.length, maxPiecesPerSlab);
     
-    const orientation1Fits = Math.floor((slabWidth + kerf) / (pieceWidth + kerf)) * Math.floor((slabHeight + kerf) / (pieceHeight + kerf));
-    const orientation2Fits = Math.floor((slabWidth + kerf) / (pieceHeight + kerf)) * Math.floor((slabHeight + kerf) / (pieceWidth + kerf));
+    // Calculate how many pieces fit in each orientation
+    const verticalCols = Math.floor((slabWidth + kerf) / (pieceWidth + kerf));
+    const verticalRows = Math.floor((slabHeight + kerf) / (pieceHeight + kerf));
+    const verticalTotal = verticalCols * verticalRows;
     
-    if (orientation1Fits >= targetPieces) {
-      const cols = Math.floor((slabWidth + kerf) / (pieceWidth + kerf));
-      const rows = Math.ceil(targetPieces / cols);
-      
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols && layout.length < targetPieces; col++) {
+    const horizontalCols = Math.floor((slabWidth + kerf) / (pieceHeight + kerf));
+    const horizontalRows = Math.floor((slabHeight + kerf) / (pieceWidth + kerf));
+    const horizontalTotal = horizontalCols * horizontalRows;
+    
+    // Choose the best orientation
+    if (verticalTotal >= horizontalTotal && verticalTotal >= targetPieces) {
+      // Use vertical orientation
+      for (let row = 0; row < verticalRows && layout.length < targetPieces; row++) {
+        for (let col = 0; col < verticalCols && layout.length < targetPieces; col++) {
           layout.push({
             x: col * (pieceWidth + kerf),
             y: row * (pieceHeight + kerf),
@@ -31,12 +37,10 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
           });
         }
       }
-    } else if (orientation2Fits >= targetPieces) {
-      const cols = Math.floor((slabWidth + kerf) / (pieceHeight + kerf));
-      const rows = Math.ceil(targetPieces / cols);
-      
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols && layout.length < targetPieces; col++) {
+    } else if (horizontalTotal >= targetPieces) {
+      // Use horizontal orientation
+      for (let row = 0; row < horizontalRows && layout.length < targetPieces; row++) {
+        for (let col = 0; col < horizontalCols && layout.length < targetPieces; col++) {
           layout.push({
             x: col * (pieceHeight + kerf),
             y: row * (pieceWidth + kerf),
@@ -48,24 +52,25 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
         }
       }
     } else {
-      // Mixed orientation logic - simplified for now
-      const verticalCols = Math.floor((slabWidth + kerf) / (pieceWidth + kerf));
-      const verticalRows = Math.floor((slabHeight + kerf) / (pieceHeight + kerf));
-      const maxVertical = verticalCols * verticalRows;
+      // Try mixed orientation if neither pure orientation fits all pieces
+      // First fill with vertical pieces
+      let currentX = 0;
+      let currentY = 0;
       
-      if (maxVertical >= targetPieces) {
-        for (let row = 0; row < verticalRows; row++) {
-          for (let col = 0; col < verticalCols && layout.length < targetPieces; col++) {
-            layout.push({
-              x: col * (pieceWidth + kerf),
-              y: row * (pieceHeight + kerf),
-              width: pieceWidth,
-              height: pieceHeight,
-              orientation: 'vertical',
-              id: layout.length + 1
-            });
-          }
+      while (layout.length < targetPieces && currentY + pieceHeight <= slabHeight) {
+        while (layout.length < targetPieces && currentX + pieceWidth <= slabWidth) {
+          layout.push({
+            x: currentX,
+            y: currentY,
+            width: pieceWidth,
+            height: pieceHeight,
+            orientation: 'vertical',
+            id: layout.length + 1
+          });
+          currentX += pieceWidth + kerf;
         }
+        currentX = 0;
+        currentY += pieceHeight + kerf;
       }
     }
     
@@ -116,7 +121,7 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
       </div>
       
       <div className="mt-2 text-xs text-gray-500 text-center">
-        Showing {layoutPieces.length} of {pieces.length} pieces (max {maxPiecesPerSlab}/slab)
+        Showing {layoutPieces.length} of {maxPiecesPerSlab} maximum pieces per slab
       </div>
     </div>
   );
@@ -788,7 +793,7 @@ export default function StoneTopEstimator() {
                 
                 <div className="text-center p-8 bg-[#F0F4F7] border border-[#D8E3E9]">
                   <SlabLayoutVisualization 
-                    pieces={Array(Math.min(parseInt(product.quantity) || 1, product.result.topsPerSlab)).fill().map((_, i) => ({
+                    pieces={Array(product.result.topsPerSlab).fill().map((_, i) => ({
                       id: i + 1,
                       width: parseFloat(product.width) || 0,
                       depth: parseFloat(product.depth) || 0,
@@ -799,6 +804,7 @@ export default function StoneTopEstimator() {
                     maxPiecesPerSlab={product.result.topsPerSlab}
                     includeKerf={includeKerf}
                     kerfWidth={kerfWidth}
+                    showMaxLayout={true}
                   />
                 </div>
                 
