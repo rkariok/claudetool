@@ -579,12 +579,17 @@ export default function StoneTopEstimator() {
 
     // Create a container div that will be converted to PDF
     const element = document.createElement('div');
-    element.style.padding = '20px';
-    element.style.fontFamily = 'Arial, sans-serif';
-    element.style.fontSize = '14px';
-    element.style.color = '#000';
-    element.style.backgroundColor = '#fff';
-    element.style.width = '210mm'; // A4 width
+    element.id = 'pdf-content';
+    element.style.cssText = `
+      padding: 40px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      color: #000;
+      background-color: #fff;
+      width: 800px;
+      max-width: 100%;
+      margin: 0 auto;
+    `;
     
     // Calculate totals
     const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0);
@@ -592,46 +597,45 @@ export default function StoneTopEstimator() {
     const avgEfficiency = allResults.length > 0 ? 
       (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
     
-    // Build the HTML content
+    // Build the HTML content without the logo for now
     let htmlContent = `
-      <div style="text-align: center; margin-bottom: 30px;">
-        <img src="/aic.jpg" alt="AIC Logo" style="width: 120px; height: auto; margin-bottom: 20px;" />
-        <h1 style="font-size: 28px; font-weight: bold; margin: 0; color: #1e40af;">AIC SURFACES</h1>
-        <h2 style="font-size: 20px; margin: 10px 0; color: #333;">OPTIMIZED STONE QUOTE</h2>
-        <p style="margin: 5px 0; color: #666;">Date: ${new Date().toLocaleDateString()}</p>
+      <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 32px; font-weight: bold; margin: 20px 0 10px 0; color: #1e40af;">AIC SURFACES</h1>
+        <h2 style="font-size: 22px; margin: 10px 0; color: #333;">OPTIMIZED STONE QUOTE</h2>
+        <p style="margin: 5px 0; color: #666; font-size: 16px;">Date: ${new Date().toLocaleDateString()}</p>
       </div>
       
-      <div style="margin-bottom: 30px; padding: 15px; background-color: #f9fafb; border-radius: 8px;">
-        <h3 style="font-size: 18px; font-weight: bold; margin: 0 0 15px 0; color: #1e40af;">Customer Information</h3>
-        <table style="width: 100%;">
+      <div style="margin-bottom: 30px; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
+        <h3 style="font-size: 20px; font-weight: bold; margin: 0 0 15px 0; color: #1e40af;">Customer Information</h3>
+        <table style="width: 100%; font-size: 14px;">
           <tr>
-            <td style="padding: 5px 0;"><strong>Name:</strong></td>
-            <td style="padding: 5px 0;">${userInfo.name || 'N/A'}</td>
+            <td style="padding: 8px 0; width: 120px;"><strong>Name:</strong></td>
+            <td style="padding: 8px 0;">${userInfo.name || 'N/A'}</td>
           </tr>
           <tr>
-            <td style="padding: 5px 0;"><strong>Email:</strong></td>
-            <td style="padding: 5px 0;">${userInfo.email || 'N/A'}</td>
+            <td style="padding: 8px 0;"><strong>Email:</strong></td>
+            <td style="padding: 8px 0;">${userInfo.email || 'N/A'}</td>
           </tr>
           <tr>
-            <td style="padding: 5px 0;"><strong>Phone:</strong></td>
-            <td style="padding: 5px 0;">${userInfo.phone || 'N/A'}</td>
+            <td style="padding: 8px 0;"><strong>Phone:</strong></td>
+            <td style="padding: 8px 0;">${userInfo.phone || 'N/A'}</td>
           </tr>
         </table>
       </div>
       
-      <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 18px; font-weight: bold; margin: 0 0 15px 0; color: #1e40af;">Quote Details</h3>
-        <table style="width: 100%; border-collapse: collapse; background-color: #fff;">
+      <div style="margin-bottom: 30px;">
+        <h3 style="font-size: 20px; font-weight: bold; margin: 0 0 20px 0; color: #1e40af;">Quote Details</h3>
+        <table style="width: 100%; border-collapse: collapse; background-color: #fff; font-size: 13px;">
           <thead>
             <tr style="background-color: #e5e7eb;">
-              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left; font-weight: 600;">Product</th>
-              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left; font-weight: 600;">Stone</th>
-              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: center; font-weight: 600;">Size</th>
-              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: center; font-weight: 600;">Qty</th>
-              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: left; font-weight: 600;">Edge</th>
-              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: center; font-weight: 600;">Slabs</th>
-              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: center; font-weight: 600;">Eff %</th>
-              <th style="border: 1px solid #d1d5db; padding: 10px; text-align: right; font-weight: 600;">Price</th>
+              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: left; font-weight: 600;">Product</th>
+              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: left; font-weight: 600;">Stone</th>
+              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: center; font-weight: 600;">Size</th>
+              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: center; font-weight: 600;">Qty</th>
+              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: left; font-weight: 600;">Edge</th>
+              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: center; font-weight: 600;">Slabs</th>
+              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: center; font-weight: 600;">Eff %</th>
+              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: right; font-weight: 600;">Price</th>
             </tr>
           </thead>
           <tbody>`;
@@ -640,20 +644,20 @@ export default function StoneTopEstimator() {
     allResults.forEach((p, index) => {
       htmlContent += `
             <tr>
-              <td style="border: 1px solid #d1d5db; padding: 10px;">${p.customName || `Product ${index + 1}`}</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px;">${p.stone || 'N/A'}</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.width}×${p.depth}"</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.quantity}</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px;">${p.edgeDetail}</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.result?.totalSlabsNeeded || 0}</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: center;">${p.result?.efficiency ? p.result.efficiency.toFixed(1) : '0'}%</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px; text-align: right; font-weight: 600; color: #059669;">$${p.result?.finalPrice ? p.result.finalPrice.toFixed(2) : '0.00'}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px 8px;">${p.customName || `Product ${index + 1}`}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px 8px;">${p.stone || 'N/A'}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px 8px; text-align: center;">${p.width}×${p.depth}"</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px 8px; text-align: center;">${p.quantity}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px 8px;">${p.edgeDetail}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px 8px; text-align: center;">${p.result?.totalSlabsNeeded || 0}</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px 8px; text-align: center;">${p.result?.efficiency ? p.result.efficiency.toFixed(1) : '0'}%</td>
+              <td style="border: 1px solid #d1d5db; padding: 10px 8px; text-align: right; font-weight: 600; color: #059669;">${p.result?.finalPrice ? p.result.finalPrice.toFixed(2) : '0.00'}</td>
             </tr>`;
       
       if (p.note) {
         htmlContent += `
             <tr>
-              <td colspan="8" style="border: 1px solid #d1d5db; padding: 10px; font-style: italic; background-color: #fffbeb; color: #92400e;">
+              <td colspan="8" style="border: 1px solid #d1d5db; padding: 10px 8px; font-style: italic; background-color: #fffbeb; color: #92400e; font-size: 12px;">
                 <strong>Note:</strong> ${p.note}
               </td>
             </tr>`;
@@ -665,32 +669,32 @@ export default function StoneTopEstimator() {
           </tbody>
           <tfoot>
             <tr style="background-color: #f3f4f6; font-weight: bold;">
-              <td colspan="7" style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-size: 16px;">Total:</td>
-              <td style="border: 1px solid #d1d5db; padding: 12px; text-align: right; font-size: 16px; color: #059669;">$${totalPrice.toFixed(2)}</td>
+              <td colspan="7" style="border: 1px solid #d1d5db; padding: 14px 8px; text-align: right; font-size: 16px;">Total:</td>
+              <td style="border: 1px solid #d1d5db; padding: 14px 8px; text-align: right; font-size: 16px; color: #059669;">${totalPrice.toFixed(2)}</td>
             </tr>
           </tfoot>
         </table>
       </div>
       
-      <div style="margin-top: 30px; display: flex; justify-content: space-around; text-align: center;">
-        <div style="padding: 20px; background-color: #dbeafe; border-radius: 8px; flex: 1; margin: 0 10px;">
-          <h4 style="margin: 0 0 10px 0; color: #1e40af; font-size: 14px;">Total Slabs</h4>
-          <p style="margin: 0; font-size: 24px; font-weight: bold; color: #1e40af;">${totalSlabs}</p>
+      <div style="margin-top: 40px; display: flex; justify-content: space-around; text-align: center; gap: 20px;">
+        <div style="padding: 25px; background-color: #dbeafe; border-radius: 8px; flex: 1;">
+          <h4 style="margin: 0 0 10px 0; color: #1e40af; font-size: 16px;">Total Slabs</h4>
+          <p style="margin: 0; font-size: 28px; font-weight: bold; color: #1e40af;">${totalSlabs}</p>
         </div>
-        <div style="padding: 20px; background-color: #d1fae5; border-radius: 8px; flex: 1; margin: 0 10px;">
-          <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 14px;">Avg Efficiency</h4>
-          <p style="margin: 0; font-size: 24px; font-weight: bold; color: #059669;">${avgEfficiency}%</p>
+        <div style="padding: 25px; background-color: #d1fae5; border-radius: 8px; flex: 1;">
+          <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 16px;">Avg Efficiency</h4>
+          <p style="margin: 0; font-size: 28px; font-weight: bold; color: #059669;">${avgEfficiency}%</p>
         </div>
-        <div style="padding: 20px; background-color: #e9d5ff; border-radius: 8px; flex: 1; margin: 0 10px;">
-          <h4 style="margin: 0 0 10px 0; color: #7c3aed; font-size: 14px;">Status</h4>
-          <p style="margin: 0; font-size: 20px; font-weight: bold; color: #7c3aed;">Optimized</p>
+        <div style="padding: 25px; background-color: #e9d5ff; border-radius: 8px; flex: 1;">
+          <h4 style="margin: 0 0 10px 0; color: #7c3aed; font-size: 16px;">Status</h4>
+          <p style="margin: 0; font-size: 24px; font-weight: bold; color: #7c3aed;">Optimized</p>
         </div>
       </div>
       
-      <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280;">
+      <div style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px;">
         <p style="margin: 5px 0;">This quote is valid for 30 days from ${new Date().toLocaleDateString()}</p>
         <p style="margin: 5px 0;">Generated by AIC Surfaces Stone Estimator</p>
-        <p style="margin: 5px 0; font-size: 12px;">Developed by Roy Kariok</p>
+        <p style="margin: 5px 0;">Developed by Roy Kariok</p>
       </div>
     `;
     
@@ -700,46 +704,31 @@ export default function StoneTopEstimator() {
     // Append to body temporarily
     document.body.appendChild(element);
     
-    // Wait for image to load
-    const img = element.querySelector('img');
-    if (img) {
-      await new Promise((resolve) => {
-        if (img.complete) {
-          resolve();
-        } else {
-          img.onload = resolve;
-          img.onerror = resolve; // Continue even if image fails
-        }
-      });
-    }
-    
     // PDF options
     const opt = {
-      margin: [10, 10, 10, 10],
+      margin: 10,
       filename: `AIC_Quote_${userInfo.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { 
         scale: 2,
         useCORS: true,
-        allowTaint: true,
-        logging: false,
+        logging: true,
+        letterRendering: true,
         windowWidth: element.scrollWidth,
         windowHeight: element.scrollHeight
       },
       jsPDF: { 
         unit: 'mm', 
         format: 'a4', 
-        orientation: 'portrait',
-        compress: true
-      },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        orientation: 'portrait'
+      }
     };
     
     // Generate PDF
     try {
       await window.html2pdf()
-        .from(element)
         .set(opt)
+        .from(element)
         .save();
       document.body.removeChild(element);
     } catch (error) {
@@ -1119,7 +1108,7 @@ export default function StoneTopEstimator() {
         <div className="max-w-[1400px] mx-auto px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <img 
-              src="/aic.jpg" 
+              src="/AIC.jpg" 
               alt="AIC Logo" 
               className="w-10 h-10 object-cover rounded"
             />
