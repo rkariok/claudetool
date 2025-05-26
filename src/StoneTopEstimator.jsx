@@ -206,10 +206,30 @@ export default function StoneTopEstimator() {
   const [quoteName, setQuoteName] = useState('');
 
   useEffect(() => {
-    // Load html2pdf from CDN
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    document.head.appendChild(script);
+    // Load html2pdf from CDN with error handling
+    const loadHtml2Pdf = async () => {
+      try {
+        // Check if already loaded
+        if (window.html2pdf) {
+          console.log('html2pdf already loaded');
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        script.onload = () => {
+          console.log('html2pdf loaded successfully');
+        };
+        script.onerror = () => {
+          console.error('Failed to load html2pdf');
+        };
+        document.head.appendChild(script);
+      } catch (error) {
+        console.error('Error loading html2pdf:', error);
+      }
+    };
+
+    loadHtml2Pdf();
 
     // Load saved quotes from localStorage
     const saved = localStorage.getItem('aicSavedQuotes');
