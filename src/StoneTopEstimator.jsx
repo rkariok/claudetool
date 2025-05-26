@@ -22,8 +22,8 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
     const horizontalRows = Math.floor((slabHeight + kerf) / (pieceWidth + kerf));
     const horizontalTotal = horizontalCols * horizontalRows;
     
-    // Choose the best orientation
-    if (verticalTotal >= horizontalTotal && verticalTotal >= targetPieces) {
+    // Check if we can achieve the target with pure orientations
+    if (verticalTotal >= targetPieces) {
       // Use vertical orientation
       for (let row = 0; row < verticalRows && layout.length < targetPieces; row++) {
         for (let col = 0; col < verticalCols && layout.length < targetPieces; col++) {
@@ -52,25 +52,47 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
         }
       }
     } else {
-      // Try mixed orientation if neither pure orientation fits all pieces
-      // First fill with vertical pieces
-      let currentX = 0;
-      let currentY = 0;
+      // Mixed orientation - this is what achieves 8 pieces for 24x36 on 126x63
+      // Try combination: some vertical (24x36) and some horizontal (36x24)
       
-      while (layout.length < targetPieces && currentY + pieceHeight <= slabHeight) {
-        while (layout.length < targetPieces && currentX + pieceWidth <= slabWidth) {
+      // First, try placing vertical pieces in one row
+      const vRow = Math.floor((slabHeight + kerf) / (pieceHeight + kerf)); // 1 row of 36" tall pieces
+      const vCols = Math.floor((slabWidth + kerf) / (pieceWidth + kerf)); // 5 pieces of 24" wide
+      
+      if (vRow > 0) {
+        for (let col = 0; col < vCols && layout.length < targetPieces; col++) {
           layout.push({
-            x: currentX,
-            y: currentY,
+            x: col * (pieceWidth + kerf),
+            y: 0,
             width: pieceWidth,
             height: pieceHeight,
             orientation: 'vertical',
             id: layout.length + 1
           });
-          currentX += pieceWidth + kerf;
         }
-        currentX = 0;
-        currentY += pieceHeight + kerf;
+        
+        // Calculate remaining height after first row
+        const usedHeight = pieceHeight + kerf;
+        const remainingHeight = slabHeight - usedHeight;
+        
+        // Now place horizontal pieces in remaining space
+        if (remainingHeight >= pieceWidth - kerf) {
+          const hRows = Math.floor((remainingHeight + kerf) / (pieceWidth + kerf));
+          const hCols = Math.floor((slabWidth + kerf) / (pieceHeight + kerf));
+          
+          for (let row = 0; row < hRows && layout.length < targetPieces; row++) {
+            for (let col = 0; col < hCols && layout.length < targetPieces; col++) {
+              layout.push({
+                x: col * (pieceHeight + kerf),
+                y: usedHeight + row * (pieceWidth + kerf),
+                width: pieceHeight,
+                height: pieceWidth,
+                orientation: 'horizontal',
+                id: layout.length + 1
+              });
+            }
+          }
+        }
       }
     }
     
@@ -78,6 +100,17 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
   };
 
   const layoutPieces = generateOptimalLayout();
+  
+  // For a 126x63 slab with 24x36 pieces, this should show 4 columns × 2 rows = 8 pieces
+  console.log('Layout debug:', {
+    slabWidth, slabHeight,
+    pieceWidth, pieceHeight,
+    kerf,
+    targetPieces: showMaxLayout ? maxPiecesPerSlab : Math.min(pieces.length, maxPiecesPerSlab),
+    verticalCols: Math.floor((slabWidth + kerf) / (pieceWidth + kerf)),
+    verticalRows: Math.floor((slabHeight + kerf) / (pieceHeight + kerf)),
+    layoutPiecesCount: layoutPieces.length
+  });
   
   const containerWidth = 400;
   const containerHeight = 250;
@@ -200,6 +233,14 @@ export default function StoneTopEstimator() {
     const option2 = fit2W * fit2H;
 
     maxPieces = Math.max(option1, option2);
+
+    // Debug log
+    console.log('Max pieces calculation:', {
+      pieceW, pieceH, slabW, slabH, kerf,
+      option1: `${fit1W}×${fit1H}=${option1}`,
+      option2: `${fit2W}×${fit2H}=${option2}`,
+      maxPieces
+    });
 
     // Option 3: Mixed orientations
     for (let rows1 = 0; rows1 <= Math.floor((slabH + kerf) / (pieceH + kerf)); rows1++) {
