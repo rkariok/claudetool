@@ -1,7 +1,47 @@
 import { useState, useEffect } from 'react';
+import { AlertCircle, Calculator, FileText, Mail, Save, FolderOpen, ChevronRight, Plus, X, Upload, Sparkles, CheckCircle, TrendingUp, DollarSign, Package, BarChart3, Info } from 'lucide-react';
 
-// Slab Layout Visualization Component
+// Modern Card Component
+const Card = ({ children, className = '' }) => (
+  <div className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${className}`}>
+    {children}
+  </div>
+);
+
+// Modern Button Component
+const Button = ({ children, variant = 'default', size = 'default', className = '', ...props }) => {
+  const variants = {
+    default: 'bg-gradient-to-r from-teal-600 to-teal-700 text-white hover:from-teal-700 hover:to-teal-800 shadow-sm',
+    outline: 'bg-white border-2 border-gray-200 text-gray-700 hover:border-teal-500 hover:text-teal-600',
+    ghost: 'bg-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+    danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700'
+  };
+  
+  const sizes = {
+    default: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base',
+    sm: 'px-3 py-1.5 text-xs'
+  };
+  
+  return (
+    <button
+      className={`font-medium rounded-lg transition-all duration-200 flex items-center gap-2 ${variants[variant]} ${sizes[size]} ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+// Enhanced Slab Layout Visualization Component with animations
 const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSlab, includeKerf, kerfWidth, showMaxLayout = false }) => {
+  const [isAnimating, setIsAnimating] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setIsAnimating(false), 1500);
+    return () => clearTimeout(timer);
+  }, [pieces]);
+  
   if (!pieces || pieces.length === 0) return null;
 
   const pieceWidth = pieces[0]?.width || 0;
@@ -10,10 +50,8 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
 
   const generateOptimalLayout = () => {
     const layout = [];
-    // Show the maximum pieces that can fit if showMaxLayout is true
     const targetPieces = showMaxLayout ? maxPiecesPerSlab : Math.min(pieces.length, maxPiecesPerSlab);
     
-    // Calculate how many pieces fit in each orientation
     const verticalCols = Math.floor((slabWidth + kerf) / (pieceWidth + kerf));
     const verticalRows = Math.floor((slabHeight + kerf) / (pieceHeight + kerf));
     const verticalTotal = verticalCols * verticalRows;
@@ -22,9 +60,7 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
     const horizontalRows = Math.floor((slabHeight + kerf) / (pieceWidth + kerf));
     const horizontalTotal = horizontalCols * horizontalRows;
     
-    // Check if we can achieve the target with pure orientations
     if (verticalTotal >= targetPieces) {
-      // Use vertical orientation
       for (let row = 0; row < verticalRows && layout.length < targetPieces; row++) {
         for (let col = 0; col < verticalCols && layout.length < targetPieces; col++) {
           layout.push({
@@ -38,7 +74,6 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
         }
       }
     } else if (horizontalTotal >= targetPieces) {
-      // Use horizontal orientation
       for (let row = 0; row < horizontalRows && layout.length < targetPieces; row++) {
         for (let col = 0; col < horizontalCols && layout.length < targetPieces; col++) {
           layout.push({
@@ -52,12 +87,8 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
         }
       }
     } else {
-      // Mixed orientation - this is what achieves 8 pieces for 24x36 on 126x63
-      // Try combination: some vertical (24x36) and some horizontal (36x24)
-      
-      // First, try placing vertical pieces in one row
-      const vRow = Math.floor((slabHeight + kerf) / (pieceHeight + kerf)); // 1 row of 36" tall pieces
-      const vCols = Math.floor((slabWidth + kerf) / (pieceWidth + kerf)); // 5 pieces of 24" wide
+      const vRow = Math.floor((slabHeight + kerf) / (pieceHeight + kerf));
+      const vCols = Math.floor((slabWidth + kerf) / (pieceWidth + kerf));
       
       if (vRow > 0) {
         for (let col = 0; col < vCols && layout.length < targetPieces; col++) {
@@ -71,11 +102,9 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
           });
         }
         
-        // Calculate remaining height after first row
         const usedHeight = pieceHeight + kerf;
         const remainingHeight = slabHeight - usedHeight;
         
-        // Now place horizontal pieces in remaining space
         if (remainingHeight >= pieceWidth - kerf) {
           const hRows = Math.floor((remainingHeight + kerf) / (pieceWidth + kerf));
           const hCols = Math.floor((slabWidth + kerf) / (pieceHeight + kerf));
@@ -101,67 +130,128 @@ const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSl
 
   const layoutPieces = generateOptimalLayout();
   
-  // For a 126x63 slab with 24x36 pieces, this should show 4 columns × 2 rows = 8 pieces
-  console.log('Layout debug:', {
-    slabWidth, slabHeight,
-    pieceWidth, pieceHeight,
-    kerf,
-    targetPieces: showMaxLayout ? maxPiecesPerSlab : Math.min(pieces.length, maxPiecesPerSlab),
-    verticalCols: Math.floor((slabWidth + kerf) / (pieceWidth + kerf)),
-    verticalRows: Math.floor((slabHeight + kerf) / (pieceHeight + kerf)),
-    layoutPiecesCount: layoutPieces.length
-  });
-  
-  const containerWidth = 400;
-  const containerHeight = 250;
+  const containerWidth = 500;
+  const containerHeight = 300;
   const scaleX = containerWidth / slabWidth;
   const scaleY = containerHeight / slabHeight;
-  const scale = Math.min(scaleX, scaleY) * 0.9;
+  const scale = Math.min(scaleX, scaleY) * 0.85;
 
   const scaledSlabWidth = slabWidth * scale;
   const scaledSlabHeight = slabHeight * scale;
 
+  // Generate grid lines
+  const gridLines = [];
+  const gridSpacing = 12; // inches
+  for (let x = gridSpacing; x < slabWidth; x += gridSpacing) {
+    gridLines.push({ x1: x * scale, y1: 0, x2: x * scale, y2: scaledSlabHeight });
+  }
+  for (let y = gridSpacing; y < slabHeight; y += gridSpacing) {
+    gridLines.push({ x1: 0, y1: y * scale, x2: scaledSlabWidth, y2: y * scale });
+  }
+
   return (
     <div className="relative">
-      <div className="mb-2 text-xs text-gray-500 text-center">
-        Slab: {slabWidth}" × {slabHeight}"
+      <div className="mb-3 flex items-center justify-center gap-2 text-sm text-gray-600">
+        <Package className="w-4 h-4" />
+        <span>Slab Dimensions: {slabWidth}" × {slabHeight}"</span>
       </div>
       
       <div 
-        className="relative border-2 border-[#0A4F63] bg-[#E8F1F4] mx-auto" 
+        className="relative mx-auto bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-inner overflow-hidden"
         style={{ 
           width: `${scaledSlabWidth}px`, 
           height: `${scaledSlabHeight}px`
         }}
       >
-        {layoutPieces.map((piece) => (
+        {/* Grid Background */}
+        <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.3 }}>
+          {gridLines.map((line, i) => (
+            <line
+              key={i}
+              x1={line.x1}
+              y1={line.y1}
+              x2={line.x2}
+              y2={line.y2}
+              stroke="#cbd5e1"
+              strokeWidth="1"
+              strokeDasharray="2,4"
+            />
+          ))}
+        </svg>
+        
+        {/* Slab Border */}
+        <div className="absolute inset-0 border-2 border-slate-400 rounded-lg pointer-events-none" />
+        
+        {/* Pieces */}
+        {layoutPieces.map((piece, index) => (
           <div
             key={piece.id}
-            className={`absolute border flex items-center justify-center text-xs font-semibold bg-[#40E0D0] bg-opacity-30 border-[#40E0D0]`}
+            className={`absolute flex flex-col items-center justify-center text-xs font-medium rounded transition-all duration-300 ${
+              isAnimating ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
+            }`}
             style={{
               left: `${piece.x * scale}px`,
               top: `${piece.y * scale}px`,
-              width: `${piece.width * scale}px`,
-              height: `${piece.height * scale}px`,
+              width: `${piece.width * scale - 2}px`,
+              height: `${piece.height * scale - 2}px`,
+              transitionDelay: `${index * 50}ms`,
+              background: 'linear-gradient(135deg, #6ee7b7 0%, #34d399 100%)',
+              border: '2px solid #059669',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
             }}
           >
-            <div className="text-center">
-              <div className="text-sm font-semibold">{piece.id}</div>
-              <div className="text-[10px]">{piece.width}×{piece.height}</div>
-            </div>
+            <div className="text-white font-bold text-sm">{piece.id}</div>
+            <div className="text-emerald-100 text-[10px]">{piece.width}×{piece.height}"</div>
+            {piece.orientation === 'horizontal' && (
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-[8px] text-white">
+                R
+              </div>
+            )}
           </div>
         ))}
       </div>
       
-      <div className="mt-2 text-xs text-gray-500 text-center">
+      <div className="mt-3 flex items-center justify-center gap-4 text-xs text-gray-500">
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-gradient-to-br from-emerald-300 to-emerald-500 rounded border border-emerald-600"></div>
+          <span>Standard Orientation</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-gradient-to-br from-emerald-300 to-emerald-500 rounded border border-emerald-600 relative">
+            <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full"></div>
+          </div>
+          <span>Rotated 90°</span>
+        </div>
+      </div>
+      
+      <div className="mt-2 text-center text-sm text-gray-600">
         {pieces.length < maxPiecesPerSlab ? 
-          `Showing ${layoutPieces.length} of ${pieces.length} pieces ordered (max ${maxPiecesPerSlab}/slab)` :
-          `Showing ${layoutPieces.length} pieces (max capacity per slab)`
+          `Showing ${layoutPieces.length} of ${pieces.length} pieces (max ${maxPiecesPerSlab} per slab)` :
+          `Showing ${layoutPieces.length} pieces (maximum capacity)`
         }
       </div>
     </div>
   );
 };
+
+// Modern Toggle Component
+const Toggle = ({ checked, onChange, label }) => (
+  <label className="flex items-center justify-between cursor-pointer group">
+    {label && <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{label}</span>}
+    <div 
+      className={`relative w-11 h-6 rounded-full transition-all duration-300 ${
+        checked ? 'bg-gradient-to-r from-teal-500 to-teal-600' : 'bg-gray-200'
+      }`}
+      onClick={onChange}
+    >
+      <div 
+        className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-all duration-300 shadow-sm ${
+          checked ? 'left-5' : 'left-0.5'
+        }`}
+      />
+    </div>
+  </label>
+);
 
 export default function StoneTopEstimator() {
   const [stoneOptions, setStoneOptions] = useState([]);
@@ -172,7 +262,6 @@ export default function StoneTopEstimator() {
   const correctPassword = 'stone123';
   const [showResults, setShowResults] = useState(false);
 
-  // Enhanced settings
   const [includeKerf, setIncludeKerf] = useState(true);
   const [kerfWidth, setKerfWidth] = useState(0.125);
   const [breakageBuffer, setBreakageBuffer] = useState(10);
@@ -196,17 +285,14 @@ export default function StoneTopEstimator() {
   ]);
   const [allResults, setAllResults] = useState([]);
   
-  // Add email state variables
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailStatus, setEmailStatus] = useState('');
 
-  // Add save/load state
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [showSavedQuotes, setShowSavedQuotes] = useState(false);
   const [quoteName, setQuoteName] = useState('');
 
   useEffect(() => {
-    // Load saved quotes from localStorage
     const saved = localStorage.getItem('aicSavedQuotes');
     if (saved) {
       setSavedQuotes(JSON.parse(saved));
@@ -226,7 +312,6 @@ export default function StoneTopEstimator() {
       });
   }, []);
 
-  // Save quote function
   const saveQuote = () => {
     const quoteName = prompt('Enter a name for this quote:');
     if (!quoteName) return;
@@ -236,7 +321,7 @@ export default function StoneTopEstimator() {
       name: quoteName,
       date: new Date().toISOString(),
       userInfo,
-      products: products.map(p => ({...p, result: null})), // Don't save results
+      products: products.map(p => ({...p, result: null})),
       settings: {
         includeKerf,
         kerfWidth,
@@ -251,7 +336,6 @@ export default function StoneTopEstimator() {
     alert('Quote saved successfully!');
   };
 
-  // Load quote function
   const loadQuote = (quote) => {
     setUserInfo(quote.userInfo);
     setProducts(quote.products);
@@ -263,7 +347,6 @@ export default function StoneTopEstimator() {
     alert('Quote loaded successfully!');
   };
 
-  // Delete quote function
   const deleteQuote = (quoteId) => {
     if (confirm('Are you sure you want to delete this quote?')) {
       const newSavedQuotes = savedQuotes.filter(q => q.id !== quoteId);
@@ -272,32 +355,20 @@ export default function StoneTopEstimator() {
     }
   };
 
-  // Calculate maximum pieces that can fit per slab with optimal mixed orientations
   const calculateMaxPiecesPerSlab = (pieceW, pieceH, slabW, slabH) => {
     const kerf = includeKerf ? kerfWidth : 0;
     let maxPieces = 0;
 
-    // Option 1: All pieces in orientation 1 (w × h)
     const fit1W = Math.floor((slabW + kerf) / (pieceW + kerf));
     const fit1H = Math.floor((slabH + kerf) / (pieceH + kerf));
     const option1 = fit1W * fit1H;
 
-    // Option 2: All pieces in orientation 2 (h × w)  
     const fit2W = Math.floor((slabW + kerf) / (pieceH + kerf));
     const fit2H = Math.floor((slabH + kerf) / (pieceW + kerf));
     const option2 = fit2W * fit2H;
 
     maxPieces = Math.max(option1, option2);
 
-    // Debug log
-    console.log('Max pieces calculation:', {
-      pieceW, pieceH, slabW, slabH, kerf,
-      option1: `${fit1W}×${fit1H}=${option1}`,
-      option2: `${fit2W}×${fit2H}=${option2}`,
-      maxPieces
-    });
-
-    // Option 3: Mixed orientations
     for (let rows1 = 0; rows1 <= Math.floor((slabH + kerf) / (pieceH + kerf)); rows1++) {
       const usedHeight1 = Math.max(0, rows1 * (pieceH + kerf) - kerf);
       const remainingHeight = slabH - usedHeight1;
@@ -331,7 +402,6 @@ export default function StoneTopEstimator() {
     return maxPieces;
   };
 
-  // Enhanced drawing upload with Claude backend
   const handleDrawingUpload = async (e, index) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
@@ -339,16 +409,13 @@ export default function StoneTopEstimator() {
     setLoadingAI(true);
     
     try {
-      // Convert file to base64
       const reader = new FileReader();
       reader.readAsDataURL(selectedFile);
       
       reader.onload = async () => {
         try {
-          // Extract base64 data
           const base64Data = reader.result.split(',')[1];
           
-          // Call API with JSON body
           const response = await fetch('/api/claude-extract-dimensions', {
             method: 'POST',
             headers: {
@@ -497,120 +564,536 @@ export default function StoneTopEstimator() {
     setProducts(products.filter((_, i) => i !== index));
   };
 
-  // New PDF Generation Function
   const generateQuotePDF = () => {
     console.log('generateQuotePDF function called!');
-    console.log('allResults data:', allResults);
     
     if (!allResults || allResults.length === 0) {
       alert("Please calculate estimates first");
       return;
     }
 
-    // Calculate totals
     const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2);
     const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
     const avgEfficiency = allResults.length > 0 ? 
       (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
 
-    // Create a new window
     const printWindow = window.open('', '_blank', 'width=900,height=800');
     
     if (!printWindow) {
       console.log('Popup blocked, trying alternative method...');
-      // Alternative: Replace current page content
       showPrintView();
       return;
     }
 
-    // Build the HTML content
     const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>AIC Surfaces Quote</title>
+        <title>AIC Surfaces - Premium Stone Quote</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 40px; margin: 0; }
-          .container { max-width: 800px; margin: 0 auto; }
-          h1, h2 { text-align: center; }
-          h1 { color: #0A4F63; }
-          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-          th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-          th { background: #0A4F63; color: white; }
-          .total-row { background: #f0f0f0; font-weight: bold; }
-          .info-box { background: #f5f5f5; padding: 20px; margin: 20px 0; }
-          .stats { text-align: center; margin: 40px 0; }
-          .stat-box { display: inline-block; margin: 0 20px; padding: 20px; background: #e8f4f8; }
-          @media print { .no-print { display: none; } }
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+          
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          
+          body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            color: #1a1a1a;
+            line-height: 1.6;
+            background: #ffffff;
+          }
+          
+          .page-container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 40px;
+            background: white;
+          }
+          
+          /* Header Section */
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #e5e7eb;
+          }
+          
+          .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+          }
+          
+          .logo {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          }
+          
+          .company-info h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            color: #0f766e;
+            margin-bottom: 4px;
+          }
+          
+          .company-info p {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+          }
+          
+          .quote-number {
+            text-align: right;
+          }
+          
+          .quote-number h2 {
+            font-size: 24px;
+            color: #0f766e;
+            font-weight: 600;
+            margin-bottom: 4px;
+          }
+          
+          .quote-number p {
+            color: #6b7280;
+            font-size: 14px;
+          }
+          
+          /* Trust Markers */
+          .trust-markers {
+            background: #f0fdfa;
+            border: 1px solid #5eead4;
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+          }
+          
+          .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #0f766e;
+            font-weight: 500;
+          }
+          
+          .trust-item .icon {
+            color: #10b981;
+            font-size: 18px;
+          }
+          
+          /* Customer Section */
+          .customer-section {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          }
+          
+          .customer-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          
+          .customer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+          }
+          
+          .customer-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+          
+          .customer-field label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          
+          .customer-field value {
+            font-size: 16px;
+            color: #1f2937;
+            font-weight: 500;
+          }
+          
+          /* Summary Cards */
+          .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+          }
+          
+          .summary-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          }
+          
+          .summary-card.primary {
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            color: white;
+            border: none;
+          }
+          
+          .summary-card.primary .label { color: #a7f3d0; }
+          
+          .summary-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 4px;
+          }
+          
+          .summary-card .label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          
+          /* Products Section */
+          .products-section {
+            margin-bottom: 30px;
+          }
+          
+          .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+          }
+          
+          .section-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+          }
+          
+          .product-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          }
+          
+          .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+          }
+          
+          .product-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+          }
+          
+          .product-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: #059669;
+          }
+          
+          .product-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+          }
+          
+          .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+          }
+          
+          .detail-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          
+          .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+          }
+          
+          .efficiency-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+          }
+          
+          .efficiency-high {
+            background: #d1fae5;
+            color: #065f46;
+          }
+          
+          .efficiency-medium {
+            background: #fef3c7;
+            color: #92400e;
+          }
+          
+          .efficiency-low {
+            background: #fee2e2;
+            color: #991b1b;
+          }
+          
+          /* Footer Section */
+          .footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 2px solid #e5e7eb;
+            text-align: center;
+          }
+          
+          .footer-content {
+            margin-bottom: 20px;
+          }
+          
+          .footer-content p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+          }
+          
+          .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+          }
+          
+          .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4b5563;
+            font-size: 14px;
+          }
+          
+          .tagline {
+            font-style: italic;
+            color: #9ca3af;
+            font-size: 13px;
+            margin-top: 20px;
+          }
+          
+          @media print { 
+            .no-print { display: none !important; }
+            body { background: white; }
+            .page-container { padding: 20px; }
+          }
         </style>
       </head>
       <body>
-        <div class="container">
-          <h1>AIC SURFACES</h1>
-          <h2>OPTIMIZED STONE QUOTE</h2>
-          <p style="text-align: center;">Date: ${new Date().toLocaleDateString()}</p>
-          
-          <div class="info-box">
-            <h3>Customer Information</h3>
-            <p><strong>Name:</strong> ${userInfo.name || 'N/A'}</p>
-            <p><strong>Email:</strong> ${userInfo.email || 'N/A'}</p>
-            <p><strong>Phone:</strong> ${userInfo.phone || 'N/A'}</p>
-          </div>
-          
-          <h3>Quote Details</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Stone</th>
-                <th>Size</th>
-                <th>Qty</th>
-                <th>Slabs</th>
-                <th>Efficiency</th>
-                <th>Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${allResults.map((p, i) => `
-                <tr>
-                  <td>${p.customName || `Product ${i + 1}`}</td>
-                  <td>${p.stone}</td>
-                  <td>${p.width}×${p.depth}"</td>
-                  <td style="text-align: center;">${p.quantity}</td>
-                  <td style="text-align: center;">${p.result?.totalSlabsNeeded || 0}</td>
-                  <td style="text-align: center;">${p.result?.efficiency?.toFixed(1) || '0'}%</td>
-                  <td style="text-align: right;">${p.result?.finalPrice?.toFixed(2) || '0.00'}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-            <tfoot>
-              <tr class="total-row">
-                <td colspan="6" style="text-align: right;">Total:</td>
-                <td style="text-align: right;">${totalPrice}</td>
-              </tr>
-            </tfoot>
-          </table>
-          
-          <div class="stats">
-            <div class="stat-box">
-              <h4>Total Slabs</h4>
-              <p style="font-size: 24px; font-weight: bold; margin: 0;">${totalSlabs}</p>
+        <div class="page-container">
+          <!-- Header -->
+          <div class="header">
+            <div class="logo-section">
+              <img src="/aic.jpg" alt="AIC Surfaces" class="logo" />
+              <div class="company-info">
+                <h1>AIC SURFACES</h1>
+                <p>PREMIUM STONE FABRICATION</p>
+              </div>
             </div>
-            <div class="stat-box">
-              <h4>Average Efficiency</h4>
-              <p style="font-size: 24px; font-weight: bold; margin: 0;">${avgEfficiency}%</p>
+            <div class="quote-number">
+              <h2>QUOTE #${Date.now().toString().slice(-6)}</h2>
+              <p>${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             </div>
           </div>
           
-          <hr>
-          <p style="text-align: center;">This quote is valid for 30 days</p>
-          <p style="text-align: center;">Generated by AIC Surfaces Stone Estimator</p>
-          
-          <div class="no-print" style="text-align: center; margin-top: 40px;">
-            <button onclick="window.print()" style="padding: 10px 30px; background: #0A4F63; color: white; border: none; cursor: pointer;">
-              Print / Save as PDF
-            </button>
+          <!-- Trust Markers -->
+          <div class="trust-markers">
+            <div class="trust-item">
+              <span class="icon">✓</span>
+              <span>Licensed & Insured</span>
+            </div>
+            <div class="trust-item">
+              <span class="icon">✓</span>
+              <span>20+ Years Experience</span>
+            </div>
+            <div class="trust-item">
+              <span class="icon">✓</span>
+              <span>AI-Optimized Layouts</span>
+            </div>
+            <div class="trust-item">
+              <span class="icon">✓</span>
+              <span>Best Price Guarantee</span>
+            </div>
           </div>
+          
+          <!-- Customer Information -->
+          <div class="customer-section">
+            <h3>
+              <span>👤</span>
+              Customer Information
+            </h3>
+            <div class="customer-grid">
+              <div class="customer-field">
+                <label>Full Name</label>
+                <value>${userInfo.name || 'Not Provided'}</value>
+              </div>
+              <div class="customer-field">
+                <label>Email Address</label>
+                <value>${userInfo.email || 'Not Provided'}</value>
+              </div>
+              <div class="customer-field">
+                <label>Phone Number</label>
+                <value>${userInfo.phone || 'Not Provided'}</value>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Summary Cards -->
+          <div class="summary-cards">
+            <div class="summary-card primary">
+              <div class="value">$${totalPrice}</div>
+              <div class="label">Total Investment</div>
+            </div>
+            <div class="summary-card">
+              <div class="value">${totalSlabs}</div>
+              <div class="label">Slabs Required</div>
+            </div>
+            <div class="summary-card">
+              <div class="value">${avgEfficiency}%</div>
+              <div class="label">Avg. Efficiency</div>
+            </div>
+          </div>
+          
+          <!-- Products -->
+          <div class="products-section">
+            <div class="section-header">
+              <span style="font-size: 24px;">📦</span>
+              <h3>Quote Details</h3>
+            </div>
+            
+            ${allResults.map((p, i) => {
+              const effClass = p.result?.efficiency > 80 ? 'efficiency-high' : 
+                              p.result?.efficiency > 60 ? 'efficiency-medium' : 'efficiency-low';
+              return `
+                <div class="product-card">
+                  <div class="product-header">
+                    <div class="product-name">${p.customName || `Product ${i + 1}`}</div>
+                    <div class="product-price">$${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
+                  </div>
+                  <div class="product-details">
+                    <div class="detail-item">
+                      <div class="detail-label">Stone Type</div>
+                      <div class="detail-value">${p.stone}</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Dimensions</div>
+                      <div class="detail-value">${p.width}" × ${p.depth}"</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Quantity</div>
+                      <div class="detail-value">${p.quantity} pieces</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Edge Detail</div>
+                      <div class="detail-value">${p.edgeDetail}</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Area</div>
+                      <div class="detail-value">${p.result?.usableAreaSqft?.toFixed(1) || '0'} sq ft</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Slabs</div>
+                      <div class="detail-value">${p.result?.totalSlabsNeeded || '0'}</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Per Slab</div>
+                      <div class="detail-value">${p.result?.topsPerSlab || '0'} pieces</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Efficiency</div>
+                      <div class="detail-value">
+                        <span class="efficiency-badge ${effClass}">
+                          ${p.result?.efficiency?.toFixed(0) || '0'}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  ${p.note ? `
+                    <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border-radius: 8px; font-size: 13px; color: #92400e;">
+                      <strong>Note:</strong> ${p.note}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+          
+          <!-- Footer -->
+          <div class="footer">
+            <div class="footer-content">
+              <p><strong>This quote is valid for 30 days from the date above</strong></p>
+              <p>Prices subject to material availability and final measurements</p>
+              
+              <div class="contact-info">
+                <div class="contact-item">
+                  <span>📞</span>
+                  <span>(555) 123-4567</span>
+                </div>
+                <div class="contact-item">
+                  <span>✉️</span>
+                  <span>quotes@aicsurfaces.com</span>
+                </div>
+                <div class="contact-item">
+                  <span>🌐</span>
+                  <span>www.aicsurfaces.com</span>
+                </div>
+              </div>
+            </div>
+            
+            <p class="tagline">Generated by AIC Surfaces Stone Estimator • Powered by AI Optimization</p>
+          </div>
+        </div>
+        
+        <div class="no-print" style="text-align: center; margin: 40px;">
+          <button onclick="window.print()" style="
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          ">
+            Print / Save as PDF
+          </button>
         </div>
       </body>
       </html>
@@ -621,57 +1104,50 @@ export default function StoneTopEstimator() {
     printWindow.focus();
   };
 
-  // Alternative method if popup is blocked
   const showPrintView = () => {
     const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2);
     const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
     
-    // Store current content
     const originalContent = document.body.innerHTML;
     
-    // Create print view
     document.body.innerHTML = `
-      <div style="max-width: 800px; margin: 0 auto; padding: 40px;">
-        <h1 style="text-align: center; color: #0A4F63;">AIC SURFACES - QUOTE</h1>
-        <p style="text-align: center;">Customer: ${userInfo.name || 'N/A'} | Date: ${new Date().toLocaleDateString()}</p>
+      <div style="max-width: 800px; margin: 0 auto; padding: 40px; font-family: -apple-system, sans-serif;">
+        <h1 style="text-align: center; color: #0f766e; font-size: 32px;">AIC SURFACES - QUOTE</h1>
+        <p style="text-align: center; color: #6b7280;">Customer: ${userInfo.name || 'N/A'} | Date: ${new Date().toLocaleDateString()}</p>
         
-        <table style="width: 100%; border-collapse: collapse; margin: 40px 0;">
-          <tr style="background: #0A4F63; color: white;">
-            <th style="border: 1px solid #ddd; padding: 10px;">Product</th>
-            <th style="border: 1px solid #ddd; padding: 10px;">Stone</th>
-            <th style="border: 1px solid #ddd; padding: 10px;">Size</th>
-            <th style="border: 1px solid #ddd; padding: 10px;">Qty</th>
-            <th style="border: 1px solid #ddd; padding: 10px;">Price</th>
-          </tr>
-          ${allResults.map(p => `
-            <tr>
-              <td style="border: 1px solid #ddd; padding: 10px;">${p.customName || 'Product'}</td>
-              <td style="border: 1px solid #ddd; padding: 10px;">${p.stone}</td>
-              <td style="border: 1px solid #ddd; padding: 10px;">${p.width}×${p.depth}"</td>
-              <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${p.quantity}</td>
-              <td style="border: 1px solid #ddd; padding: 10px; text-align: right;">${(p.result?.finalPrice || 0).toFixed(2)}</td>
-            </tr>
-          `).join('')}
-          <tr style="background: #f0f0f0; font-weight: bold;">
-            <td colspan="4" style="border: 1px solid #ddd; padding: 10px; text-align: right;">Total:</td>
-            <td style="border: 1px solid #ddd; padding: 10px; text-align: right;">${totalPrice}</td>
-          </tr>
-        </table>
-        
-        <p style="text-align: center; font-size: 18px;">Total Slabs: ${totalSlabs}</p>
+        <div style="margin: 40px 0; padding: 20px; background: #f0fdfa; border-radius: 12px; text-align: center;">
+          <h2 style="color: #0f766e; margin-bottom: 10px;">Total: $${totalPrice}</h2>
+          <p style="color: #14b8a6;">Slabs Required: ${totalSlabs}</p>
+        </div>
         
         <div style="text-align: center; margin-top: 40px;">
-          <button onclick="window.print()" style="padding: 15px 40px; background: #0A4F63; color: white; border: none; font-size: 18px; cursor: pointer; margin-right: 10px;">
+          <button onclick="window.print()" style="
+            padding: 16px 40px;
+            background: #0f766e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-right: 10px;
+          ">
             Print / Save as PDF
           </button>
-          <button onclick="location.reload()" style="padding: 15px 40px; background: #666; color: white; border: none; font-size: 18px; cursor: pointer;">
+          <button onclick="location.reload()" style="
+            padding: 16px 40px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+          ">
             Go Back
           </button>
         </div>
       </div>
     `;
     
-    // Auto-focus on print
     window.print();
   };
 
@@ -740,178 +1216,9 @@ export default function StoneTopEstimator() {
   };
 
   const generatePDF = async () => {
-    if (allResults.length === 0) {
-      alert("Please calculate estimates first");
-      return;
-    }
-
-    if (!window.html2pdf) {
-      alert("PDF generator is still loading. Please try again in a moment.");
-      return;
-    }
-
-    // Create a container div that will be converted to PDF
-    const element = document.createElement('div');
-    element.id = 'pdf-content';
-    element.style.cssText = `
-      padding: 40px;
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      color: #000;
-      background-color: #fff;
-      width: 800px;
-      max-width: 100%;
-      margin: 0 auto;
-    `;
-    
-    // Calculate totals
-    const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0);
-    const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
-    const avgEfficiency = allResults.length > 0 ? 
-      (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
-    
-    // Build the HTML content without the logo for now
-    let htmlContent = `
-      <div style="text-align: center; margin-bottom: 40px;">
-        <h1 style="font-size: 32px; font-weight: bold; margin: 20px 0 10px 0; color: #1e40af;">AIC SURFACES</h1>
-        <h2 style="font-size: 22px; margin: 10px 0; color: #333;">OPTIMIZED STONE QUOTE</h2>
-        <p style="margin: 5px 0; color: #666; font-size: 16px;">Date: ${new Date().toLocaleDateString()}</p>
-      </div>
-      
-      <div style="margin-bottom: 30px; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
-        <h3 style="font-size: 20px; font-weight: bold; margin: 0 0 15px 0; color: #1e40af;">Customer Information</h3>
-        <table style="width: 100%; font-size: 14px;">
-          <tr>
-            <td style="padding: 8px 0; width: 120px;"><strong>Name:</strong></td>
-            <td style="padding: 8px 0;">${userInfo.name || 'N/A'}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0;"><strong>Email:</strong></td>
-            <td style="padding: 8px 0;">${userInfo.email || 'N/A'}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0;"><strong>Phone:</strong></td>
-            <td style="padding: 8px 0;">${userInfo.phone || 'N/A'}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <div style="margin-bottom: 30px;">
-        <h3 style="font-size: 20px; font-weight: bold; margin: 0 0 20px 0; color: #1e40af;">Quote Details</h3>
-        <table style="width: 100%; border-collapse: collapse; background-color: #fff; font-size: 13px;">
-          <thead>
-            <tr style="background-color: #e5e7eb;">
-              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: left; font-weight: 600;">Product</th>
-              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: left; font-weight: 600;">Stone</th>
-              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: center; font-weight: 600;">Size</th>
-              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: center; font-weight: 600;">Qty</th>
-              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: left; font-weight: 600;">Edge</th>
-              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: center; font-weight: 600;">Slabs</th>
-              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: center; font-weight: 600;">Eff %</th>
-              <th style="border: 1px solid #d1d5db; padding: 12px 8px; text-align: right; font-weight: 600;">Price</th>
-            </tr>
-          </thead>
-          <tbody>`;
-    
-    // Add each product row
-    allResults.forEach((p, index) => {
-      htmlContent += `
-            <tr>
-              <td style="border: 1px solid #d1d5db; padding: 10px 8px;">${p.customName || `Product ${index + 1}`}</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px 8px;">${p.stone || 'N/A'}</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px 8px; text-align: center;">${p.width}×${p.depth}"</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px 8px; text-align: center;">${p.quantity}</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px 8px;">${p.edgeDetail}</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px 8px; text-align: center;">${p.result?.totalSlabsNeeded || 0}</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px 8px; text-align: center;">${p.result?.efficiency ? p.result.efficiency.toFixed(1) : '0'}%</td>
-              <td style="border: 1px solid #d1d5db; padding: 10px 8px; text-align: right; font-weight: 600; color: #059669;">${p.result?.finalPrice ? p.result.finalPrice.toFixed(2) : '0.00'}</td>
-            </tr>`;
-      
-      if (p.note) {
-        htmlContent += `
-            <tr>
-              <td colspan="8" style="border: 1px solid #d1d5db; padding: 10px 8px; font-style: italic; background-color: #fffbeb; color: #92400e; font-size: 12px;">
-                <strong>Note:</strong> ${p.note}
-              </td>
-            </tr>`;
-      }
-    });
-    
-    // Add totals row
-    htmlContent += `
-          </tbody>
-          <tfoot>
-            <tr style="background-color: #f3f4f6; font-weight: bold;">
-              <td colspan="7" style="border: 1px solid #d1d5db; padding: 14px 8px; text-align: right; font-size: 16px;">Total:</td>
-              <td style="border: 1px solid #d1d5db; padding: 14px 8px; text-align: right; font-size: 16px; color: #059669;">${totalPrice.toFixed(2)}</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-      
-      <div style="margin-top: 40px; display: flex; justify-content: space-around; text-align: center; gap: 20px;">
-        <div style="padding: 25px; background-color: #dbeafe; border-radius: 8px; flex: 1;">
-          <h4 style="margin: 0 0 10px 0; color: #1e40af; font-size: 16px;">Total Slabs</h4>
-          <p style="margin: 0; font-size: 28px; font-weight: bold; color: #1e40af;">${totalSlabs}</p>
-        </div>
-        <div style="padding: 25px; background-color: #d1fae5; border-radius: 8px; flex: 1;">
-          <h4 style="margin: 0 0 10px 0; color: #059669; font-size: 16px;">Avg Efficiency</h4>
-          <p style="margin: 0; font-size: 28px; font-weight: bold; color: #059669;">${avgEfficiency}%</p>
-        </div>
-        <div style="padding: 25px; background-color: #e9d5ff; border-radius: 8px; flex: 1;">
-          <h4 style="margin: 0 0 10px 0; color: #7c3aed; font-size: 16px;">Status</h4>
-          <p style="margin: 0; font-size: 24px; font-weight: bold; color: #7c3aed;">Optimized</p>
-        </div>
-      </div>
-      
-      <div style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px;">
-        <p style="margin: 5px 0;">This quote is valid for 30 days from ${new Date().toLocaleDateString()}</p>
-        <p style="margin: 5px 0;">Generated by AIC Surfaces Stone Estimator</p>
-        <p style="margin: 5px 0;">Developed by Roy Kariok</p>
-      </div>
-    `;
-    
-    // Set the HTML content
-    element.innerHTML = htmlContent;
-    
-    // Append to body temporarily
-    document.body.appendChild(element);
-    
-    // PDF options
-    const opt = {
-      margin: 10,
-      filename: `AIC_Quote_${userInfo.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2,
-        useCORS: true,
-        logging: true,
-        letterRendering: true,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight
-      },
-      jsPDF: { 
-        unit: 'mm', 
-        format: 'a4', 
-        orientation: 'portrait'
-      }
-    };
-    
-    // Generate PDF
-    try {
-      await window.html2pdf()
-        .set(opt)
-        .from(element)
-        .save();
-      document.body.removeChild(element);
-    } catch (error) {
-      console.error('PDF generation error:', error);
-      document.body.removeChild(element);
-      alert('Failed to generate PDF. Please try again.');
-    }
+    generateQuotePDF();
   };
 
-  // EmailJS implementation - NO API NEEDED!
   const sendEmailToClient = async () => {
     if (!userInfo.email || !userInfo.name) {
       alert("Please fill in customer name and email first!");
@@ -927,7 +1234,6 @@ export default function StoneTopEstimator() {
     setEmailStatus('Sending email...');
 
     try {
-      // Load EmailJS if not already loaded
       if (!window.emailjs) {
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
@@ -935,16 +1241,87 @@ export default function StoneTopEstimator() {
         await new Promise(resolve => script.onload = resolve);
       }
       
-      // Initialize EmailJS with your credentials
       window.emailjs.init("GiLTtkDDw2VZi0isD");
       
-      // Calculate totals
       const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2);
       const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
       const avgEfficiency = allResults.length > 0 ? 
         (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
       
-      // Prepare email data
+      // Create beautiful HTML email content
+      const emailHTML = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 32px;">AIC SURFACES</h1>
+            <p style="color: #a7f3d0; margin: 10px 0 0 0; font-size: 14px; letter-spacing: 2px;">PREMIUM STONE QUOTE</p>
+          </div>
+          
+          <div style="background: white; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none;">
+            <p style="color: #4b5563; margin-bottom: 30px;">Dear ${userInfo.name},</p>
+            
+            <p style="color: #4b5563; line-height: 1.6; margin-bottom: 30px;">
+              Thank you for choosing AIC Surfaces! We're excited to present your personalized stone fabrication quote, 
+              optimized using our advanced AI layout system to minimize waste and maximize value.
+            </p>
+            
+            <div style="background: #f9fafb; border-radius: 12px; padding: 30px; margin-bottom: 30px; text-align: center;">
+              <h2 style="color: #0f766e; margin: 0 0 20px 0; font-size: 24px;">Your Quote Summary</h2>
+              
+              <div style="display: inline-block; margin: 0 15px;">
+                <div style="color: #14b8a6; font-size: 36px; font-weight: bold;">$${totalPrice}</div>
+                <div style="color: #6b7280; font-size: 14px;">Total Investment</div>
+              </div>
+              
+              <div style="display: inline-block; margin: 0 15px;">
+                <div style="color: #14b8a6; font-size: 36px; font-weight: bold;">${totalSlabs}</div>
+                <div style="color: #6b7280; font-size: 14px;">Slabs Required</div>
+              </div>
+              
+              <div style="display: inline-block; margin: 0 15px;">
+                <div style="color: #14b8a6; font-size: 36px; font-weight: bold;">${avgEfficiency}%</div>
+                <div style="color: #6b7280; font-size: 14px;">Material Efficiency</div>
+              </div>
+            </div>
+            
+            <div style="background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+              <h3 style="color: #1f2937; margin: 0 0 16px 0; font-size: 18px;">Products in Your Quote:</h3>
+              ${allResults.map(p => `
+                <div style="border-bottom: 1px solid #e5e7eb; padding: 12px 0;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <strong style="color: #1f2937;">${p.customName || 'Product'}</strong>
+                      <div style="color: #6b7280; font-size: 14px;">${p.stone} • ${p.width}"×${p.depth}" • Qty: ${p.quantity}</div>
+                    </div>
+                    <div style="color: #059669; font-size: 20px; font-weight: bold;">$${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="#" style="display: inline-block; background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                Accept Quote & Schedule Consultation
+              </a>
+            </div>
+            
+            <div style="border-top: 2px solid #e5e7eb; padding-top: 30px; margin-top: 40px;">
+              <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
+                <strong>Next Steps:</strong><br>
+                1. Review your quote details<br>
+                2. Click the button above to accept<br>
+                3. We'll contact you within 24 hours to schedule your template<br>
+                4. Your dream countertops will be ready in 2-3 weeks!
+              </p>
+              
+              <p style="color: #9ca3af; font-size: 12px; margin-top: 20px; text-align: center;">
+                This quote is valid for 30 days • Questions? Call (555) 123-4567<br>
+                Generated on ${new Date().toLocaleDateString()} • Powered by AI Optimization
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+      
       const templateParams = {
         to_email: userInfo.email,
         to_name: userInfo.name,
@@ -955,10 +1332,10 @@ export default function StoneTopEstimator() {
         products_list: allResults.map(p => 
           `- ${p.customName || 'Product'}: ${p.stone} ${p.width}"×${p.depth}" (Qty: ${p.quantity}) - $${p.result?.finalPrice?.toFixed(2) || '0.00'}`
         ).join('\n'),
-        quote_date: new Date().toLocaleDateString()
+        quote_date: new Date().toLocaleDateString(),
+        html_content: emailHTML // Add the HTML content
       };
 
-      // Send email using EmailJS
       const response = await window.emailjs.send(
         'service_4xwxsbp',
         'template_pw68h0p',
@@ -967,7 +1344,7 @@ export default function StoneTopEstimator() {
 
       if (response.status === 200) {
         setEmailStatus('✅ Email sent successfully!');
-        alert(`✅ Quote sent successfully to ${userInfo.email}!\n\nThe customer will receive a detailed quote with all products, pricing, and optimization details.`);
+        alert(`✅ Quote sent successfully to ${userInfo.email}!\n\nThe customer will receive a beautifully formatted quote with all details.`);
       } else {
         throw new Error('Failed to send email');
       }
@@ -978,91 +1355,72 @@ export default function StoneTopEstimator() {
       alert(`❌ Failed to send email: ${error.message || 'Unknown error'}\n\nPlease check your EmailJS configuration and try again.`);
     } finally {
       setSendingEmail(false);
-      // Clear status after 5 seconds
       setTimeout(() => setEmailStatus(''), 5000);
     }
   };
 
-  // Toggle component
-  const Toggle = ({ checked, onChange }) => (
-    <div 
-      className={`w-9 h-5 rounded-full relative cursor-pointer transition-all duration-300 ${
-        checked ? 'bg-[#0A4F63]' : 'bg-[#D8E3E9]'
-      }`}
-      onClick={onChange}
-    >
-      <div 
-        className={`absolute w-4 h-4 bg-white rounded-full top-0.5 transition-all duration-300 shadow-sm ${
-          checked ? 'left-[18px] bg-[#40E0D0]' : 'left-0.5'
-        }`}
-      />
-    </div>
-  );
-
-  // Saved Quotes Modal
   if (showSavedQuotes) {
     return (
-      <div className="min-h-screen bg-[#F0F4F7]">
-        <header className="bg-white border-b border-[#D8E3E9]">
-          <div className="max-w-[1400px] mx-auto px-8 py-4 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <img 
-                src="/AIC.jpg" 
-                alt="AIC Logo" 
-                className="w-10 h-10 object-cover rounded"
-              />
-              <div>
-                <h1 className="text-xl font-bold text-[#0A4F63] font-serif tracking-wide">AIC Surfaces</h1>
-                <p className="text-xs text-[#5A8FA0] uppercase tracking-wider">Saved Quotes</p>
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <img src="/aic.jpg" alt="AIC Logo" className="w-12 h-12 rounded-xl shadow-sm" />
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-teal-700 bg-clip-text text-transparent">
+                    AIC Surfaces
+                  </h1>
+                  <p className="text-xs text-gray-500 font-medium tracking-wider uppercase">Saved Quotes</p>
+                </div>
               </div>
             </div>
           </div>
         </header>
 
-        <div className="max-w-[1400px] mx-auto p-8">
-          <button
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Button
             onClick={() => setShowSavedQuotes(false)}
-            className="flex items-center gap-2 px-4 py-2 border border-[#D8E3E9] text-[#0A4F63] text-xs font-medium hover:border-[#40E0D0] hover:text-[#40E0D0] transition-all mb-6"
+            variant="ghost"
+            className="mb-6"
           >
             ← Back to Estimator
-          </button>
+          </Button>
 
-          <h2 className="text-2xl font-serif mb-6 text-[#0A4F63]">Saved Quotes</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">Saved Quotes</h2>
 
           {savedQuotes.length === 0 ? (
-            <div className="bg-white border border-[#D8E3E9] p-8 text-center">
-              <p className="text-[#5A8FA0]">No saved quotes found.</p>
-            </div>
+            <Card className="p-12 text-center">
+              <p className="text-gray-500">No saved quotes found.</p>
+            </Card>
           ) : (
             <div className="grid gap-4">
               {savedQuotes.map((quote) => (
-                <div key={quote.id} className="bg-white border border-[#D8E3E9] p-6 hover:border-[#40E0D0] transition-all">
+                <Card key={quote.id} className="p-6 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="text-lg font-semibold text-[#0A4F63]">{quote.name}</h3>
-                      <p className="text-sm text-[#5A8FA0]">
+                      <h3 className="text-lg font-semibold text-gray-900">{quote.name}</h3>
+                      <p className="text-sm text-gray-500 mt-1">
                         Saved on: {new Date(quote.date).toLocaleDateString()} at {new Date(quote.date).toLocaleTimeString()}
                       </p>
-                      <p className="text-sm text-[#5A8FA0] mt-1">
-                        Customer: {quote.userInfo.name || 'N/A'} | Products: {quote.products.length}
+                      <p className="text-sm text-gray-600 mt-2">
+                        Customer: {quote.userInfo.name || 'N/A'} • Products: {quote.products.length}
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => loadQuote(quote)}
-                        className="px-4 py-2 bg-[#0A4F63] text-[#40E0D0] text-xs font-medium uppercase tracking-wider hover:bg-[#40E0D0] hover:text-[#0A4F63] transition-all"
-                      >
-                        Load
-                      </button>
-                      <button
+                      <Button onClick={() => loadQuote(quote)} size="sm">
+                        Load Quote
+                      </Button>
+                      <Button
                         onClick={() => deleteQuote(quote.id)}
-                        className="px-4 py-2 border border-red-500 text-red-500 text-xs font-medium uppercase tracking-wider hover:bg-red-500 hover:text-white transition-all"
+                        variant="danger"
+                        size="sm"
                       >
                         Delete
-                      </button>
+                      </Button>
                     </div>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           )}
@@ -1073,208 +1431,291 @@ export default function StoneTopEstimator() {
 
   if (showResults) {
     return (
-      <div className="min-h-screen bg-[#F0F4F7]">
+      <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="bg-white border-b border-[#D8E3E9]">
-          <div className="max-w-[1400px] mx-auto px-8 py-4 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <img 
-                src="/AIC.jpg" 
-                alt="AIC Logo" 
-                className="w-10 h-10 object-cover rounded"
-              />
-              <div>
-                <h1 className="text-xl font-bold text-[#0A4F63] font-serif tracking-wide">AIC Surfaces</h1>
-                <p className="text-xs text-[#5A8FA0] uppercase tracking-wider">Premium Stone Fabrication</p>
+        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <img src="/aic.jpg" alt="AIC Logo" className="w-12 h-12 rounded-xl shadow-sm" />
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-teal-700 bg-clip-text text-transparent">
+                    AIC Surfaces
+                  </h1>
+                  <p className="text-xs text-gray-500 font-medium tracking-wider uppercase">Premium Stone Fabrication</p>
+                </div>
               </div>
             </div>
           </div>
         </header>
 
         {/* Results Container */}
-        <div className="max-w-[1400px] mx-auto p-8">
-          <button
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Button
             onClick={() => setShowResults(false)}
-            className="flex items-center gap-2 px-4 py-2 border border-[#D8E3E9] text-[#0A4F63] text-xs font-medium hover:border-[#40E0D0] hover:text-[#40E0D0] transition-all mb-4"
+            variant="ghost"
+            className="mb-6"
           >
             ← Back to Products
-          </button>
+          </Button>
           
-          <h2 className="text-2xl font-serif mb-8 text-[#0A4F63]">Optimized Results</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
+            <Sparkles className="w-8 h-8 text-teal-600" />
+            Optimized Results
+          </h2>
           
-          {/* Summary Cards - with smaller text */}
-          <div className="grid grid-cols-3 gap-6 mb-8">
-            <div className="bg-white border border-[#D8E3E9] p-6 text-center">
-              <div className="text-2xl font-bold text-[#40E0D0] font-serif mb-2">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card className="p-6 text-center bg-gradient-to-br from-teal-50 to-white border-teal-200">
+              <DollarSign className="w-8 h-8 text-teal-600 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-teal-700">
+                ${allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2)}
+              </div>
+              <div className="text-sm text-teal-600 font-medium mt-1">Total Investment</div>
+            </Card>
+            <Card className="p-6 text-center bg-gradient-to-br from-blue-50 to-white border-blue-200">
+              <Package className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-blue-700">
                 {allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0)}
               </div>
-              <div className="text-xs text-[#5A8FA0] uppercase tracking-wider">Total Slabs Needed</div>
-            </div>
-            <div className="bg-white border border-[#D8E3E9] p-6 text-center">
-              <div className="text-2xl font-bold text-[#40E0D0] font-serif mb-2">
+              <div className="text-sm text-blue-600 font-medium mt-1">Total Slabs Needed</div>
+            </Card>
+            <Card className="p-6 text-center bg-gradient-to-br from-emerald-50 to-white border-emerald-200">
+              <TrendingUp className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-emerald-700">
                 {allResults.length > 0 ? 
                   (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : 
                   '0'
                 }%
               </div>
-              <div className="text-xs text-[#5A8FA0] uppercase tracking-wider">Average Efficiency</div>
-            </div>
-            <div className="bg-white border border-[#D8E3E9] p-6 text-center">
-              <div className="text-2xl font-bold text-[#40E0D0] font-serif mb-2">
-                ${allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2)}
-              </div>
-              <div className="text-xs text-[#5A8FA0] uppercase tracking-wider">Total Cost</div>
-            </div>
+              <div className="text-sm text-emerald-600 font-medium mt-1">Average Efficiency</div>
+            </Card>
           </div>
 
           {/* Slab Layout Visualization */}
-          {showVisualLayouts && allResults.map((product, productIndex) => {
-            if (!product.result) return null;
-            
-            const stone = stoneOptions.find(s => s["Stone Type"] === product.stone);
-            const slabWidth = parseFloat(stone?.["Slab Width"]) || 126;
-            const slabHeight = parseFloat(stone?.["Slab Height"]) || 63;
-            
-            return (
-              <div key={productIndex} className="bg-white border border-[#D8E3E9] p-6 mb-6">
-                <h3 className="text-base font-semibold text-[#0A4F63] font-serif mb-4">
-                  Layout Preview: {product.customName || `Product ${productIndex + 1}`} - {product.stone} ({product.width}x{product.depth})
-                </h3>
+          {showVisualLayouts && (
+            <div className="space-y-6 mb-8">
+              {allResults.map((product, productIndex) => {
+                if (!product.result) return null;
                 
-                <div className="text-center p-8 bg-[#F0F4F7] border border-[#D8E3E9]">
-                  <SlabLayoutVisualization 
-                    pieces={Array(Math.min(parseInt(product.quantity) || 1, product.result.topsPerSlab)).fill().map((_, i) => ({
-                      id: i + 1,
-                      width: parseFloat(product.width) || 0,
-                      depth: parseFloat(product.depth) || 0,
-                      name: `${product.stone} #${i + 1}`
-                    }))}
-                    slabWidth={slabWidth}
-                    slabHeight={slabHeight}
-                    maxPiecesPerSlab={product.result.topsPerSlab}
-                    includeKerf={includeKerf}
-                    kerfWidth={kerfWidth}
-                    showMaxLayout={false}
-                  />
-                </div>
+                const stone = stoneOptions.find(s => s["Stone Type"] === product.stone);
+                const slabWidth = parseFloat(stone?.["Slab Width"]) || 126;
+                const slabHeight = parseFloat(stone?.["Slab Height"]) || 63;
                 
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_250px] gap-8 mt-6">
-                  <div></div>
-                  <div className="bg-[#F0F4F7] p-4 border border-[#D8E3E9]">
-                    <h4 className="text-sm font-semibold mb-4 text-[#0A4F63]">Layout Analysis</h4>
-                    <div className="text-xs space-y-2">
-                      <div>✓ Vertical: {product.width}×{product.depth}</div>
-                      <div>✓ Kerf: {kerfWidth}"</div>
-                      <div className="mt-4 pt-4 border-t border-[#D8E3E9] space-y-1">
-                        <div><strong>Max Pieces/Slab:</strong> {product.result.topsPerSlab}</div>
-                        <div><strong>Total Quantity:</strong> {product.quantity}</div>
-                        <div><strong>Efficiency:</strong> <span className={`font-semibold ${
-                          product.result.efficiency > 80 ? 'text-green-600' : 
-                          product.result.efficiency > 60 ? 'text-yellow-600' : 'text-red-600'
-                        }`}>{product.result.efficiency?.toFixed(1) || '0'}%</span></div>
-                        <div><strong>Slabs Needed:</strong> {product.result.totalSlabsNeeded}</div>
+                const pieces = Array(parseInt(product.quantity) || 1).fill().map((_, i) => ({
+                  id: i + 1,
+                  width: parseFloat(product.width) || 0,
+                  depth: parseFloat(product.depth) || 0,
+                  name: `${product.stone} #${i + 1}`
+                }));
+                
+                return (
+                  <Card key={productIndex} className="p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-teal-600" />
+                      Layout Visualization: {product.customName || `Product ${productIndex + 1}`}
+                    </h3>
+                    
+                    <div className="bg-gray-50 rounded-xl p-8">
+                      <SlabLayoutVisualization 
+                        pieces={pieces}
+                        slabWidth={slabWidth}
+                        slabHeight={slabHeight}
+                        maxPiecesPerSlab={product.result.topsPerSlab}
+                        includeKerf={includeKerf}
+                        kerfWidth={kerfWidth}
+                        showMaxLayout={false}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                      <div className="bg-gradient-to-br from-gray-50 to-white rounded-lg p-4 border border-gray-200">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                          <Info className="w-4 h-4" />
+                          Layout Details
+                        </h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Piece Size:</span>
+                            <span className="font-medium">{product.width}" × {product.depth}"</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Slab Size:</span>
+                            <span className="font-medium">{slabWidth}" × {slabHeight}"</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Kerf Width:</span>
+                            <span className="font-medium">{includeKerf ? `${kerfWidth}"` : 'Not included'}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-teal-50 to-white rounded-lg p-4 border border-teal-200">
+                        <h4 className="text-sm font-semibold text-teal-700 mb-3 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" />
+                          Optimization Results
+                        </h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-teal-600">Max Pieces/Slab:</span>
+                            <span className="font-bold text-teal-700">{product.result.topsPerSlab}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-teal-600">Total Quantity:</span>
+                            <span className="font-bold text-teal-700">{product.quantity}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-teal-600">Efficiency:</span>
+                            <span className={`font-bold ${
+                              product.result.efficiency > 80 ? 'text-green-600' : 
+                              product.result.efficiency > 60 ? 'text-yellow-600' : 'text-red-600'
+                            }`}>{product.result.efficiency?.toFixed(1) || '0'}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-teal-600">Slabs Needed:</span>
+                            <span className="font-bold text-teal-700">{product.result.totalSlabsNeeded}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                  </Card>
+                );
+              })}
+            </div>
+          )}
 
-          {/* Results Table */}
-          <div className="bg-white border border-[#D8E3E9] overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Product</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Stone</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Size</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Qty</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Edge</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Area</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Per Slab</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Slabs</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Eff %</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Material</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Fab</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Cost</th>
-                  <th className="bg-[#0A4F63] text-[#40E0D0] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider border-b-2 border-[#40E0D0]">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allResults.map((p, i) => (
-                  <tr key={i} className="hover:bg-[#F0F4F7] text-xs text-[#0A4F63]">
-                    <td className="px-3 py-3 border-b border-[#E8F1F4]">{p.customName || `Product ${i + 1}`}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4]">{p.stone}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4]">{p.width}×{p.depth}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4] text-center">{p.quantity}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4]">{p.edgeDetail}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4] text-center">{p.result?.usableAreaSqft?.toFixed(1)}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4] text-center text-purple-700 font-semibold">{p.result?.topsPerSlab || '-'}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4] text-center text-blue-600 font-semibold">{p.result?.totalSlabsNeeded || '-'}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4] text-center">
-                      <span className={`font-semibold ${
+          {/* Results Cards */}
+          <div className="space-y-4 mb-8">
+            {allResults.map((p, i) => (
+              <Card key={i} className="p-6 hover:shadow-md transition-shadow">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                      {p.customName || `Product ${i + 1}`}
+                    </h3>
+                    <p className="text-gray-600 text-sm">{p.stone}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 flex-1">
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider">Size</p>
+                      <p className="font-semibold text-gray-900">{p.width}×{p.depth}"</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider">Qty</p>
+                      <p className="font-semibold text-gray-900">{p.quantity}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider">Edge</p>
+                      <p className="font-semibold text-gray-900">{p.edgeDetail}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider">Area</p>
+                      <p className="font-semibold text-gray-900">{p.result?.usableAreaSqft?.toFixed(1)} ft²</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider">Per Slab</p>
+                      <p className="font-semibold text-purple-600">{p.result?.topsPerSlab || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider">Slabs</p>
+                      <p className="font-semibold text-blue-600">{p.result?.totalSlabsNeeded || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider">Efficiency</p>
+                      <p className={`font-bold ${
                         (p.result?.efficiency || 0) > 80 ? 'text-green-600' : 
                         (p.result?.efficiency || 0) > 60 ? 'text-yellow-600' : 'text-red-600'
                       }`}>
-                        {p.result?.efficiency?.toFixed(0) || '0'}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4] text-right">${p.result?.materialCost?.toFixed(0) || '0'}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4] text-right">${p.result?.fabricationCost?.toFixed(0) || '0'}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4] text-right">${p.result?.rawCost?.toFixed(0) || '0'}</td>
-                    <td className="px-3 py-3 border-b border-[#E8F1F4] text-right font-semibold text-green-600">${p.result?.finalPrice?.toFixed(0) || '0'}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="bg-[#F0F4F7] font-semibold">
-                  <td colSpan={9} className="px-4 py-4 text-right border-t-2 border-[#D8E3E9]">Totals:</td>
-                  <td className="px-4 py-4 text-right text-blue-600 border-t-2 border-[#D8E3E9]">
-                    ${allResults.reduce((sum, p) => sum + (p.result?.materialCost || 0), 0).toFixed(0)}
-                  </td>
-                  <td className="px-4 py-4 text-right text-orange-600 border-t-2 border-[#D8E3E9]">
-                    ${allResults.reduce((sum, p) => sum + (p.result?.fabricationCost || 0), 0).toFixed(0)}
-                  </td>
-                  <td className="px-4 py-4 text-right text-gray-600 border-t-2 border-[#D8E3E9]">
-                    ${allResults.reduce((sum, p) => sum + (p.result?.rawCost || 0), 0).toFixed(0)}
-                  </td>
-                  <td className="px-4 py-4 text-right text-green-600 text-sm font-bold border-t-2 border-[#D8E3E9]">
-                    ${allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2)}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
+                        {p.result?.efficiency?.toFixed(0) || '0'}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider">Total</p>
+                      <p className="font-bold text-green-600 text-xl">${p.result?.finalPrice?.toFixed(0) || '0'}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {p.note && (
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-sm text-amber-800">
+                      <span className="font-semibold">Note:</span> {p.note}
+                    </p>
+                  </div>
+                )}
+              </Card>
+            ))}
           </div>
 
+          {/* Total Summary */}
+          <Card className="p-6 bg-gradient-to-r from-teal-600 to-teal-700 text-white">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-teal-100 text-sm uppercase tracking-wider">Grand Total</p>
+                <p className="text-4xl font-bold">
+                  ${allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2)}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-teal-100 text-sm">
+                  Material: ${allResults.reduce((sum, p) => sum + (p.result?.materialCost || 0), 0).toFixed(0)} • 
+                  Fabrication: ${allResults.reduce((sum, p) => sum + (p.result?.fabricationCost || 0), 0).toFixed(0)}
+                </p>
+                <p className="text-teal-100 text-sm mt-1">
+                  Raw Cost: ${allResults.reduce((sum, p) => sum + (p.result?.rawCost || 0), 0).toFixed(0)}
+                </p>
+              </div>
+            </div>
+          </Card>
+
           {/* Action Buttons */}
-          <div className="flex justify-center gap-4 mt-8 pb-16">
-            <button
-              onClick={() => {
-                console.log('PDF button clicked!');
-                generateQuotePDF();
-              }}
-              className="px-6 py-2 bg-white text-[#0A4F63] border border-[#D8E3E9] text-xs font-medium uppercase tracking-wider hover:border-[#40E0D0] hover:text-[#40E0D0] transition-all"
+          <div className="flex flex-wrap justify-center gap-4 mt-8">
+            <Button
+              onClick={generateQuotePDF}
+              size="lg"
+              variant="outline"
             >
-              📄 Generate PDF
-            </button>
-            <button
+              <FileText className="w-5 h-5" />
+              Generate PDF
+            </Button>
+            <Button
               onClick={sendEmailToClient}
               disabled={sendingEmail || !userInfo.email}
-              className={`px-6 py-2 bg-white text-[#0A4F63] border border-[#D8E3E9] text-xs font-medium uppercase tracking-wider transition-all ${
-                sendingEmail || !userInfo.email 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:border-[#40E0D0] hover:text-[#40E0D0]'
-              }`}
+              size="lg"
+              variant="outline"
             >
-              {sendingEmail ? 'Sending...' : '📧 Email Quote'}
-            </button>
-            <button
+              <Mail className="w-5 h-5" />
+              {sendingEmail ? 'Sending...' : 'Email Quote'}
+            </Button>
+            <Button
               onClick={() => setShowResults(false)}
-              className="px-6 py-2 bg-[#0A4F63] text-[#40E0D0] border border-[#0A4F63] text-xs font-medium uppercase tracking-wider hover:bg-[#40E0D0] hover:text-[#0A4F63] transition-all"
+              size="lg"
             >
               Back to Edit
-            </button>
+            </Button>
+          </div>
+
+          {/* Trust Markers */}
+          <div className="mt-12 text-center text-sm text-gray-500">
+            <div className="flex items-center justify-center gap-6 flex-wrap">
+              <span className="flex items-center gap-1">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                Licensed & Insured
+              </span>
+              <span className="flex items-center gap-1">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                20+ Years Experience
+              </span>
+              <span className="flex items-center gap-1">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                AI-Optimized Layouts
+              </span>
+              <span className="flex items-center gap-1">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                Accurate as of {new Date().toLocaleDateString()}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -1282,132 +1723,230 @@ export default function StoneTopEstimator() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0F4F7]">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-[#D8E3E9]">
-        <div className="max-w-[1400px] mx-auto px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <img 
-              src="/AIC.jpg" 
-              alt="AIC Logo" 
-              className="w-10 h-10 object-cover rounded"
-            />
-            <div>
-              <h1 className="text-xl font-bold text-[#0A4F63] font-serif tracking-wide">AIC Surfaces</h1>
-              <p className="text-xs text-[#5A8FA0] uppercase tracking-wider">Premium Stone Fabrication</p>
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img src="/aic.jpg" alt="AIC Logo" className="w-12 h-12 rounded-xl shadow-sm" />
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-teal-700 bg-clip-text text-transparent">
+                  AIC Surfaces
+                </h1>
+                <p className="text-xs text-gray-500 font-medium tracking-wider uppercase">Premium Stone Fabrication</p>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={saveQuote}
-              className="px-4 py-2 bg-white text-[#0A4F63] border border-[#D8E3E9] text-xs font-medium uppercase tracking-wider hover:border-[#40E0D0] hover:text-[#40E0D0] transition-all"
-            >
-              💾 Save Quote
-            </button>
-            <button
-              onClick={() => setShowSavedQuotes(true)}
-              className="px-4 py-2 bg-white text-[#0A4F63] border border-[#D8E3E9] text-xs font-medium uppercase tracking-wider hover:border-[#40E0D0] hover:text-[#40E0D0] transition-all"
-            >
-              📂 Load Quote ({savedQuotes.length})
-            </button>
+            <div className="flex gap-2">
+              <Button
+                onClick={saveQuote}
+                variant="outline"
+                size="sm"
+              >
+                <Save className="w-4 h-4" />
+                Save Quote
+              </Button>
+              <Button
+                onClick={() => setShowSavedQuotes(true)}
+                variant="outline"
+                size="sm"
+              >
+                <FolderOpen className="w-4 h-4" />
+                Load Quote ({savedQuotes.length})
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Progress Navigation */}
-      <nav className="max-w-[1400px] mx-auto px-8 py-6 flex justify-center gap-2">
-        <div className="flex items-center gap-2">
-          <span className="w-6 h-6 rounded-full bg-[#0A4F63] text-[#40E0D0] flex items-center justify-center text-xs">✓</span>
-        </div>
-        <div className="w-24 h-px bg-[#D8E3E9] self-center"></div>
-        <div className="flex items-center gap-2">
-          <span className="w-6 h-6 rounded-full bg-[#40E0D0] text-[#0A4F63] flex items-center justify-center text-xs font-medium">2</span>
-        </div>
-        <div className="w-24 h-px bg-[#D8E3E9] self-center"></div>
-        <div className="flex items-center gap-2">
-          <span className="w-6 h-6 rounded-full border border-[#D8E3E9] text-[#5A8FA0] flex items-center justify-center text-xs">3</span>
-        </div>
-        <div className="w-24 h-px bg-[#D8E3E9] self-center"></div>
-        <div className="flex items-center gap-2">
-          <span className="w-6 h-6 rounded-full border border-[#D8E3E9] text-[#5A8FA0] flex items-center justify-center text-xs">4</span>
-        </div>
-      </nav>
-
-      {/* Main Container */}
-      <div className="max-w-[1400px] mx-auto px-8 grid grid-cols-[300px_1fr] gap-8 pb-24">
-        {/* Sidebar */}
-        <aside className="bg-white border border-[#D8E3E9] p-6 h-fit sticky top-4">
-          <h2 className="text-base font-bold text-[#0A4F63] font-serif mb-6">Settings</h2>
-          
-          <div className="space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-[#E8F1F4]">
-              <span className="text-xs font-medium text-[#0A4F63]">Include Kerf</span>
-              <Toggle checked={includeKerf} onChange={() => setIncludeKerf(!includeKerf)} />
+      {/* Progress Steps */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-center items-center space-x-4">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                ✓
+              </div>
+              <span className="ml-2 text-sm font-medium text-gray-900">Customer Info</span>
             </div>
-            
-            <div className="flex justify-between items-center py-3 border-b border-[#E8F1F4]">
-              <span className="text-xs font-medium text-[#0A4F63]">Visual Preview</span>
-              <Toggle checked={showVisualLayouts} onChange={() => setShowVisualLayouts(!showVisualLayouts)} />
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                2
+              </div>
+              <span className="ml-2 text-sm font-medium text-gray-900">Products</span>
             </div>
-            
-            <div className="mt-4">
-              <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Kerf Width</label>
-              <select
-                value={kerfWidth}
-                onChange={(e) => setKerfWidth(parseFloat(e.target.value))}
-                disabled={!includeKerf}
-                className="w-full px-3 py-2 bg-white border border-[#D8E3E9] text-xs text-[#0A4F63] focus:outline-none focus:border-[#40E0D0] disabled:opacity-50"
-              >
-                <option value={0.125}>1/8" (0.125) - Standard</option>
-                <option value={0.1875}>3/16" (0.1875) - Thick Material</option>
-                <option value={0.25}>1/4" (0.25) - Heavy Duty</option>
-                <option value={0.09375}>3/32" (0.094) - Thin Blade</option>
-              </select>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center">
+              <div className="w-8 h-8 border-2 border-gray-300 text-gray-400 rounded-full flex items-center justify-center text-sm font-medium">
+                3
+              </div>
+              <span className="ml-2 text-sm font-medium text-gray-400">Calculate</span>
             </div>
-            
-            <div className="mt-4">
-              <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Breakage Buffer (%)</label>
-              <select
-                value={breakageBuffer}
-                onChange={(e) => setBreakageBuffer(parseInt(e.target.value))}
-                className="w-full px-3 py-2 bg-white border border-[#D8E3E9] text-xs text-[#0A4F63] focus:outline-none focus:border-[#40E0D0]"
-              >
-                <option value={5}>5% - Conservative</option>
-                <option value={10}>10% - Standard</option>
-                <option value={15}>15% - High Risk</option>
-                <option value={20}>20% - Very High Risk</option>
-              </select>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center">
+              <div className="w-8 h-8 border-2 border-gray-300 text-gray-400 rounded-full flex items-center justify-center text-sm font-medium">
+                4
+              </div>
+              <span className="ml-2 text-sm font-medium text-gray-400">Results</span>
             </div>
           </div>
-        </aside>
+        </div>
+      </div>
 
-        {/* Main Content */}
-        <main>
-          <div className="space-y-4">
+      {/* Main Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
+          {/* Sidebar */}
+          <aside>
+            <Card className="p-6 sticky top-24">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">Settings</h2>
+              
+              <div className="space-y-6">
+                <Toggle 
+                  label="Include Kerf" 
+                  checked={includeKerf} 
+                  onChange={() => setIncludeKerf(!includeKerf)} 
+                />
+                
+                <Toggle 
+                  label="Visual Preview" 
+                  checked={showVisualLayouts} 
+                  onChange={() => setShowVisualLayouts(!showVisualLayouts)} 
+                />
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Kerf Width
+                  </label>
+                  <select
+                    value={kerfWidth}
+                    onChange={(e) => setKerfWidth(parseFloat(e.target.value))}
+                    disabled={!includeKerf}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
+                  >
+                    <option value={0.125}>1/8" (0.125) - Standard</option>
+                    <option value={0.1875}>3/16" (0.1875) - Thick</option>
+                    <option value={0.25}>1/4" (0.25) - Heavy Duty</option>
+                    <option value={0.09375}>3/32" (0.094) - Thin</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Breakage Buffer
+                  </label>
+                  <select
+                    value={breakageBuffer}
+                    onChange={(e) => setBreakageBuffer(parseInt(e.target.value))}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  >
+                    <option value={5}>5% - Conservative</option>
+                    <option value={10}>10% - Standard</option>
+                    <option value={15}>15% - High Risk</option>
+                    <option value={20}>20% - Very High Risk</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Trust Markers in Sidebar */}
+              <div className="mt-8 pt-8 border-t border-gray-200">
+                <div className="space-y-3 text-xs text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>AI-Powered Optimization</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Instant Accurate Quotes</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>20+ Years Industry Experience</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </aside>
+
+          {/* Main Content */}
+          <main className="space-y-6">
+            {/* Contact Information */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-teal-600" />
+                Contact Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={userInfo.name}
+                    onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
+                    placeholder="John Smith"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    value={userInfo.email}
+                    onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+                    placeholder="email@example.com"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={userInfo.phone}
+                    onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
+                    placeholder="(555) 123-4567"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </Card>
+
             {/* Products */}
             {products.map((product, index) => (
-              <div key={product.id} className="bg-white border border-[#D8E3E9] p-6">
+              <Card key={product.id} className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-base font-semibold text-[#0A4F63] font-serif">
-                    {product.customName || `Product ${index + 1}`} - {product.stone || 'Select Stone'}
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {product.customName || `Product ${index + 1}`}
                   </h3>
                   {products.length > 1 && (
-                    <button
+                    <Button
                       onClick={() => removeProduct(index)}
-                      className="w-6 h-6 rounded-full border border-[#D8E3E9] text-[#5A8FA0] hover:border-[#40E0D0] hover:text-[#40E0D0] flex items-center justify-center text-sm transition-all"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700"
                     >
-                      ×
-                    </button>
+                      <X className="w-4 h-4" />
+                    </Button>
                   )}
                 </div>
                 
-                <div className="grid grid-cols-4 gap-3 mb-3">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                   <div>
-                    <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Stone Type</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Stone Type
+                    </label>
                     <select
                       value={product.stone}
                       onChange={(e) => updateProduct(index, 'stone', e.target.value)}
-                      className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     >
                       <option value="">Select...</option>
                       {stoneOptions.map((stone, i) => (
@@ -1416,55 +1955,68 @@ export default function StoneTopEstimator() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Width (in)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Width (inches)
+                    </label>
                     <input
                       type="number"
                       value={product.width}
                       onChange={(e) => updateProduct(index, 'width', e.target.value)}
-                      className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all"
+                      placeholder="24"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Depth (in)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Depth (inches)
+                    </label>
                     <input
                       type="number"
                       value={product.depth}
                       onChange={(e) => updateProduct(index, 'depth', e.target.value)}
-                      className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all"
+                      placeholder="36"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Quantity</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Quantity
+                    </label>
                     <input
                       type="number"
                       value={product.quantity}
                       onChange={(e) => updateProduct(index, 'quantity', e.target.value)}
-                      className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all"
+                      min="1"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-4 gap-3 mb-3">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                   <div>
-                    <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Edge Detail</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Edge Detail
+                    </label>
                     <select
                       value={product.edgeDetail}
                       onChange={(e) => updateProduct(index, 'edgeDetail', e.target.value)}
-                      className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     >
                       <option value="Eased">Eased</option>
-                      <option value="1.5 mitered">1.5" mitered</option>
+                      <option value="1.5 mitered">1.5" Mitered</option>
                       <option value="Bullnose">Bullnose</option>
                       <option value="Ogee">Ogee</option>
                       <option value="Beveled">Beveled</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Priority</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Priority
+                    </label>
                     <select
                       value={product.priority}
                       onChange={(e) => updateProduct(index, 'priority', e.target.value)}
-                      className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     >
                       <option value="normal">Normal</option>
                       <option value="high">High</option>
@@ -1472,40 +2024,50 @@ export default function StoneTopEstimator() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Custom Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Custom Name
+                    </label>
                     <input
                       type="text"
                       value={product.customName}
                       onChange={(e) => updateProduct(index, 'customName', e.target.value)}
-                      placeholder="Optional"
-                      className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all"
+                      placeholder="Kitchen Island"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Upload Drawing</label>
-                    <input
-                      type="file"
-                      accept="image/*,.pdf,.dwg,.dxf"
-                      onChange={(e) => handleDrawingUpload(e, index)}
-                      disabled={loadingAI}
-                      className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all file:mr-2 file:px-2 file:py-1 file:rounded file:border-0 file:text-xs file:font-medium file:bg-[#40E0D0] file:text-[#0A4F63] hover:file:bg-[#0A4F63] hover:file:text-[#40E0D0]"
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Upload Drawing
+                    </label>
+                    <label className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
+                      <Upload className="w-4 h-4" />
+                      {loadingAI ? 'Analyzing...' : 'Choose File'}
+                      <input
+                        type="file"
+                        accept="image/*,.pdf,.dwg,.dxf"
+                        onChange={(e) => handleDrawingUpload(e, index)}
+                        disabled={loadingAI}
+                        className="hidden"
+                      />
+                    </label>
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Notes</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Notes
+                  </label>
                   <textarea
                     value={product.note}
                     onChange={(e) => updateProduct(index, 'note', e.target.value)}
                     placeholder="Add any special instructions..."
                     rows={2}
-                    className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all resize-none"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
                   />
                 </div>
                 
                 {loadingAI && index === products.findIndex(p => p.id === product.id) && (
-                  <div className="mt-4 bg-blue-50 border border-blue-200 rounded p-4">
+                  <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-center space-x-3">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                       <div>
@@ -1515,109 +2077,57 @@ export default function StoneTopEstimator() {
                     </div>
                   </div>
                 )}
-              </div>
+              </Card>
             ))}
 
             {/* Add Product Button */}
             <button
               onClick={addProduct}
-              className="w-full py-3 border border-dashed border-[#40E0D0] text-[#40E0D0] text-xs font-medium uppercase tracking-wider hover:bg-[#40E0D0] hover:text-[#0A4F63] hover:border-solid transition-all"
+              className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-teal-500 hover:text-teal-600 transition-all flex items-center justify-center gap-2 group"
             >
-              + Add Another Product
+              <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              Add Another Product
             </button>
-
-            {/* Contact Section */}
-            <div className="bg-white border border-[#D8E3E9] p-6">
-              <h3 className="text-base font-semibold text-[#0A4F63] font-serif mb-4">Contact Information</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Full Name *</label>
-                  <input
-                    type="text"
-                    value={userInfo.name}
-                    onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
-                    placeholder="John Smith"
-                    className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Email *</label>
-                  <input
-                    type="email"
-                    value={userInfo.email}
-                    onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-                    placeholder="email@example.com"
-                    className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-medium text-[#5A8FA0] uppercase tracking-wider mb-1">Phone Number</label>
-                  <input
-                    type="tel"
-                    value={userInfo.phone}
-                    onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
-                    placeholder="(555) 123-4567"
-                    className="w-full px-3 py-2 bg-[#F0F4F7] border border-transparent text-xs text-[#0A4F63] focus:outline-none focus:bg-white focus:border-[#40E0D0] transition-all"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
 
       {/* Fixed Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#D8E3E9] py-3 shadow-lg z-50">
-        <div className="max-w-[1400px] mx-auto px-8 flex justify-between items-center">
-          <div></div>
-          <div className="flex gap-2">
-            <button
-              onClick={addProduct}
-              className="px-6 py-2 bg-white text-[#0A4F63] border border-[#D8E3E9] text-xs font-medium uppercase tracking-wider hover:border-[#40E0D0] hover:text-[#40E0D0] transition-all"
-            >
-              Add Another Product
-            </button>
-            <button
-              onClick={calculateAll}
-              className="px-6 py-2 bg-[#0A4F63] text-[#40E0D0] border border-[#0A4F63] text-xs font-medium uppercase tracking-wider hover:bg-[#40E0D0] hover:text-[#0A4F63] transition-all"
-            >
-              Calculate Quote
-            </button>
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 shadow-lg z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-500">
+              {products.length} product{products.length !== 1 ? 's' : ''} added
+            </p>
+            <div className="flex gap-3">
+              <Button
+                onClick={addProduct}
+                variant="outline"
+              >
+                <Plus className="w-4 h-4" />
+                Add Product
+              </Button>
+              <Button
+                onClick={calculateAll}
+                size="lg"
+                className="shadow-lg"
+              >
+                <Calculator className="w-5 h-5" />
+                Calculate Quote
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Email status message */}
       {emailStatus && (
-        <div className={`fixed bottom-20 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg text-center font-medium animate-pulse ${
+        <div className={`fixed bottom-20 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg text-center font-medium shadow-lg animate-pulse ${
           emailStatus.includes('✅') ? 'bg-green-100 text-green-800 border border-green-300' : 
           emailStatus.includes('❌') ? 'bg-red-100 text-red-800 border border-red-300' : 
           'bg-blue-100 text-blue-800 border border-blue-300'
         }`}>
           {emailStatus}
-        </div>
-      )}
-
-      {/* Admin Mode */}
-      {!adminMode && (
-        <div className="fixed bottom-4 left-4 bg-white p-4 rounded-lg shadow-lg border border-[#D8E3E9] z-50">
-          <div className="flex items-center gap-2">
-            <input
-              type="password"
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-              placeholder="Admin Password"
-              className="px-3 py-2 border border-[#D8E3E9] text-xs focus:outline-none focus:border-[#40E0D0]"
-            />
-            <button
-              onClick={() => setAdminMode(adminPassword === correctPassword)}
-              className="px-4 py-2 bg-[#0A4F63] text-[#40E0D0] text-xs font-medium uppercase tracking-wider hover:bg-[#40E0D0] hover:text-[#0A4F63] transition-all"
-            >
-              Enter
-            </button>
-          </div>
         </div>
       )}
     </div>
