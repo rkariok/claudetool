@@ -1011,409 +1011,6 @@ export default function StoneTopEstimator() {
           }
           
           @media print { 
-            .no-print { display: none !important; }
-            body { background: white; }
-            .page-container { padding: 20px; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="page-container">
-          <!-- Header -->
-          <div class="header">
-            <div class="logo-section">
-              <img src="${window.location.origin}/AIC.jpg" alt="AIC Surfaces" class="logo" onerror="this.style.display='none'" />
-              <div class="company-info">
-                <h1>AIC SURFACES</h1>
-                <p>PREMIUM STONE FABRICATION</p>
-              </div>
-            </div>
-            <div class="quote-number">
-              <h2>QUOTE #${Date.now().toString().slice(-6)}</h2>
-              <p>${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            </div>
-          </div>
-          
-          <!-- Trust Markers -->
-          <div class="trust-markers">
-            <div class="trust-item">
-              <span class="icon">✓</span>
-              <span>Licensed & Insured</span>
-            </div>
-            <div class="trust-item">
-              <span class="icon">✓</span>
-              <span>20+ Years Experience</span>
-            </div>
-            <div class="trust-item">
-              <span class="icon">✓</span>
-              <span>AI-Optimized Layouts</span>
-            </div>
-            <div class="trust-item">
-              <span class="icon">✓</span>
-              <span>Best Price Guarantee</span>
-            </div>
-          </div>
-          
-          <!-- Customer Information -->
-          <div class="customer-section">
-            <h3>
-              <span>👤</span>
-              Customer Information
-            </h3>
-            <div class="customer-grid">
-              <div class="customer-field">
-                <label>Full Name</label>
-                <value>${userInfo.name || 'Not Provided'}</value>
-              </div>
-              <div class="customer-field">
-                <label>Email Address</label>
-                <value>${userInfo.email || 'Not Provided'}</value>
-              </div>
-              <div class="customer-field">
-                <label>Phone Number</label>
-                <value>${userInfo.phone || 'Not Provided'}</value>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Summary Cards -->
-          <div class="summary-cards">
-            <div class="summary-card primary">
-              <div class="value">$${totalPrice}</div>
-              <div class="label">Total Investment</div>
-            </div>
-            <div class="summary-card">
-              <div class="value">${totalSlabs}</div>
-              <div class="label">Slabs Required</div>
-            </div>
-            <div class="summary-card">
-              <div class="value">${avgEfficiency}%</div>
-              <div class="label">Avg. Efficiency</div>
-            </div>
-          </div>
-          
-          <!-- Products -->
-          <div class="products-section">
-            <div class="section-header">
-              <span style="font-size: 24px;">📦</span>
-              <h3>Quote Details</h3>
-            </div>
-            
-            ${allResults.map((p, i) => {
-              const effClass = p.result?.efficiency > 80 ? 'efficiency-high' : 
-                              p.result?.efficiency > 60 ? 'efficiency-medium' : 'efficiency-low';
-              return `
-                <div class="product-card">
-                  <div class="product-header">
-                    <div class="product-name">${p.customName || `Product ${i + 1}`}</div>
-                    <div class="product-price">$${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
-                  </div>
-                  <div class="product-details">
-                    <div class="detail-item">
-                      <div class="detail-label">Stone Type</div>
-                      <div class="detail-value">${p.stone}</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Dimensions</div>
-                      <div class="detail-value">${p.width}" × ${p.depth}"</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Quantity</div>
-                      <div class="detail-value">${p.quantity} pieces</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Edge Detail</div>
-                      <div class="detail-value">${p.edgeDetail}</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Area</div>
-                      <div class="detail-value">${p.result?.usableAreaSqft?.toFixed(1) || '0'} sq ft</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Slabs</div>
-                      <div class="detail-value">${p.result?.totalSlabsNeeded || '0'}</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Per Slab</div>
-                      <div class="detail-value">${p.result?.topsPerSlab || '0'} pieces</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Efficiency</div>
-                      <div class="detail-value">
-                        <span class="efficiency-badge ${effClass}">
-                          ${p.result?.efficiency?.toFixed(0) || '0'}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  ${p.note ? `
-                    <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border-radius: 8px; font-size: 13px; color: #92400e;">
-                      <strong>Note:</strong> ${p.note}
-                    </div>
-                  ` : ''}
-                </div>
-              `;
-            }).join('')}
-          </div>
-          
-          <!-- Footer -->
-          <div class="footer">
-            <div class="footer-content">
-              <p><strong>This quote is valid for 30 days from the date above</strong></p>
-              <p>Prices subject to material availability and final measurements</p>
-              
-              <div class="contact-info">
-                <div class="contact-item">
-                  <span>📞</span>
-                  <span>(555) 123-4567</span>
-                </div>
-                <div class="contact-item">
-                  <span>✉️</span>
-                  <span>quotes@aicsurfaces.com</span>
-                </div>
-                <div class="contact-item">
-                  <span>🌐</span>
-                  <span>www.aicsurfaces.com</span>
-                </div>
-              </div>
-            </div>
-            
-            <p class="tagline">Generated by AIC Surfaces Stone Estimator • Powered by AI Optimization</p>
-          </div>
-        </div>
-        
-        <div class="no-print" style="text-align: center; margin: 40px;">
-          <button onclick="window.print()" style="
-            padding: 16px 40px;
-            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-          ">
-            Print / Save as PDF
-          </button>
-        </div>
-      </body>
-      </html>
-    `;
-    
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
-    printWindow.focus();
-  };
-
-  const showPrintView = () => {
-    const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2);
-    const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
-    
-    const originalContent = document.body.innerHTML;
-    
-    document.body.innerHTML = `
-      <div style="max-width: 800px; margin: 0 auto; padding: 40px; font-family: -apple-system, sans-serif;">
-        <h1 style="text-align: center; color: #0f766e; font-size: 32px;">AIC SURFACES - QUOTE</h1>
-        <p style="text-align: center; color: #6b7280;">Customer: ${userInfo.name || 'N/A'} | Date: ${new Date().toLocaleDateString()}</p>
-        
-        <div style="margin: 40px 0; padding: 20px; background: #f0fdfa; border-radius: 12px; text-align: center;">
-          <h2 style="color: #0f766e; margin-bottom: 10px;">Total: $${totalPrice}</h2>
-          <p style="color: #14b8a6;">Slabs Required: ${totalSlabs}</p>
-        </div>
-        
-        <div style="text-align: center; margin-top: 40px;">
-          <button onclick="window.print()" style="
-            padding: 16px 40px;
-            background: #0f766e;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-            margin-right: 10px;
-          ">
-            Print / Save as PDF
-          </button>
-          <button onclick="location.reload()" style="
-            padding: 16px 40px;
-            background: #6b7280;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-          ">
-            Go Back
-          </button>
-        </div>
-      </div>
-    `;
-    
-    window.print();
-  };
-
-  const calculateAll = () => {
-    console.log("Calculate button clicked!");
-    
-    const results = products.map((product) => {
-      const stone = stoneOptions.find(s => s["Stone Type"] === product.stone);
-      if (!stone) return { ...product, result: null };
-
-      const slabCost = parseFloat(stone["Slab Cost"]);
-      const fabCost = parseFloat(stone["Fab Cost"]);
-      const markup = parseFloat(stone["Mark Up"]);
-      const w = parseFloat(product.width);
-      const d = parseFloat(product.depth);
-      const quantity = parseInt(product.quantity);
-
-      if (!w || !d || isNaN(slabCost) || isNaN(fabCost) || isNaN(markup)) return { ...product, result: null };
-
-      const slabWidth = parseFloat(stone["Slab Width"]);
-      const slabHeight = parseFloat(stone["Slab Height"]);
-
-      const pieces = Array(quantity).fill().map((_, i) => ({
-        id: i + 1,
-        width: w,
-        depth: d,
-        name: `${product.stone} #${i + 1}`
-      }));
-
-      const maxPiecesPerSlab = calculateMaxPiecesPerSlab(w, d, slabWidth, slabHeight);
-      
-      const area = w * d;
-      const usableAreaSqft = (area / 144) * quantity;
-      const totalSlabsNeeded = Math.ceil(quantity / maxPiecesPerSlab);
-      const totalSlabArea = totalSlabsNeeded * slabWidth * slabHeight;
-      const totalUsedArea = pieces.reduce((sum, p) => sum + p.width * p.depth, 0);
-      const efficiency = totalSlabArea > 0 ? (totalUsedArea / totalSlabArea) * 100 : 0;
-      
-      const materialCost = (slabCost * totalSlabsNeeded) * (1 + breakageBuffer/100);
-      const fabricationCost = usableAreaSqft * fabCost;
-      const rawCost = materialCost + fabricationCost;
-      const finalPrice = rawCost * markup;
-
-      return {
-        ...product,
-        result: {
-          usableAreaSqft,
-          totalSlabsNeeded,
-          efficiency,
-          materialCost,
-          fabricationCost,
-          rawCost,
-          finalPrice,
-          topsPerSlab: maxPiecesPerSlab
-        }
-      };
-    });
-
-    const updatedProducts = products.map((product, index) => ({
-      ...product,
-      result: results[index]?.result || null
-    }));
-    setProducts(updatedProducts);
-    setAllResults(results);
-    setShowResults(true);
-  };
-
-  const generatePDF = async () => {
-    generateQuotePDF();
-  };
-
-  const sendEmailToClient = async () => {
-    if (!userInfo.email || !userInfo.name) {
-      alert("Please fill in customer name and email first!");
-      return;
-    }
-
-    if (allResults.length === 0) {
-      alert("Please calculate estimates first!");
-      return;
-    }
-
-    setSendingEmail(true);
-    setEmailStatus('Sending email...');
-
-    try {
-      if (!window.emailjs) {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
-        document.head.appendChild(script);
-        await new Promise(resolve => script.onload = resolve);
-      }
-      
-      window.emailjs.init("GiLTtkDDw2VZi0isD");
-      
-      const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2);
-      const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
-      const avgEfficiency = allResults.length > 0 ? 
-        (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
-      
-      // Create beautiful HTML email content matching PDF design
-      const emailHTML = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>AIC Surfaces - Premium Stone Quote</title>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <!--[if mso]>
-          <noscript>
-            <xml>
-              <o:OfficeDocumentSettings>
-                <o:PixelsPerInch>96</o:PixelsPerInch>
-              </o:OfficeDocumentSettings>
-            </xml>
-          </noscript>
-          <![endif]-->
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
-            
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            
-            body { 
-              font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-              color: #1a1a1a;
-              line-height: 1.6;
-              background: #ffffff;
-              margin: 0;
-              padding: 0;
-            }
-            
-            .page-container {
-              max-width: 850px;
-              margin: 0 auto;
-              padding: 40px;
-              background: white;
-            }
-            
-            /* Header Section */
-            .header {
-              display: table;
-              width: 100%;
-              margin-bottom: 40px;
-              padding-bottom: 30px;
-              border-bottom: 3px solid #e5e7eb;
-            }
-            
-            .logo-section {
-              display: table-cell;
-              vertical-align: middle;
-              width: 60%;
-            }
-            
-            .logo {
-              width: 80px;
-              height: 80px;
-              object-fit: cover;
-              border-radius: 12px;
-              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-              display: inline-block;
-              vertical-align: middle;
-              margin-right: 20px;
-            }
-            
             .company-info {
               display: inline-block;
               vertical-align: middle;
@@ -1945,4 +1542,407 @@ export default function StoneTopEstimator() {
           </div>
         </body>
         </html>
-      `;
+      `;no-print { display: none !important; }
+            body { background: white; }
+            .page-container { padding: 20px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="page-container">
+          <!-- Header -->
+          <div class="header">
+            <div class="logo-section">
+              <img src="${window.location.origin}/AIC.jpg" alt="AIC Surfaces" class="logo" onerror="this.style.display='none'" />
+              <div class="company-info">
+                <h1>AIC SURFACES</h1>
+                <p>PREMIUM STONE FABRICATION</p>
+              </div>
+            </div>
+            <div class="quote-number">
+              <h2>QUOTE #${Date.now().toString().slice(-6)}</h2>
+              <p>${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
+          </div>
+          
+          <!-- Trust Markers -->
+          <div class="trust-markers">
+            <div class="trust-item">
+              <span class="icon">✓</span>
+              <span>Licensed & Insured</span>
+            </div>
+            <div class="trust-item">
+              <span class="icon">✓</span>
+              <span>20+ Years Experience</span>
+            </div>
+            <div class="trust-item">
+              <span class="icon">✓</span>
+              <span>AI-Optimized Layouts</span>
+            </div>
+            <div class="trust-item">
+              <span class="icon">✓</span>
+              <span>Best Price Guarantee</span>
+            </div>
+          </div>
+          
+          <!-- Customer Information -->
+          <div class="customer-section">
+            <h3>
+              <span>👤</span>
+              Customer Information
+            </h3>
+            <div class="customer-grid">
+              <div class="customer-field">
+                <label>Full Name</label>
+                <value>${userInfo.name || 'Not Provided'}</value>
+              </div>
+              <div class="customer-field">
+                <label>Email Address</label>
+                <value>${userInfo.email || 'Not Provided'}</value>
+              </div>
+              <div class="customer-field">
+                <label>Phone Number</label>
+                <value>${userInfo.phone || 'Not Provided'}</value>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Summary Cards -->
+          <div class="summary-cards">
+            <div class="summary-card primary">
+              <div class="value">$${totalPrice}</div>
+              <div class="label">Total Investment</div>
+            </div>
+            <div class="summary-card">
+              <div class="value">${totalSlabs}</div>
+              <div class="label">Slabs Required</div>
+            </div>
+            <div class="summary-card">
+              <div class="value">${avgEfficiency}%</div>
+              <div class="label">Avg. Efficiency</div>
+            </div>
+          </div>
+          
+          <!-- Products -->
+          <div class="products-section">
+            <div class="section-header">
+              <span style="font-size: 24px;">📦</span>
+              <h3>Quote Details</h3>
+            </div>
+            
+            ${allResults.map((p, i) => {
+              const effClass = p.result?.efficiency > 80 ? 'efficiency-high' : 
+                              p.result?.efficiency > 60 ? 'efficiency-medium' : 'efficiency-low';
+              return `
+                <div class="product-card">
+                  <div class="product-header">
+                    <div class="product-name">${p.customName || `Product ${i + 1}`}</div>
+                    <div class="product-price">$${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
+                  </div>
+                  <div class="product-details">
+                    <div class="detail-item">
+                      <div class="detail-label">Stone Type</div>
+                      <div class="detail-value">${p.stone}</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Dimensions</div>
+                      <div class="detail-value">${p.width}" × ${p.depth}"</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Quantity</div>
+                      <div class="detail-value">${p.quantity} pieces</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Edge Detail</div>
+                      <div class="detail-value">${p.edgeDetail}</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Area</div>
+                      <div class="detail-value">${p.result?.usableAreaSqft?.toFixed(1) || '0'} sq ft</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Slabs</div>
+                      <div class="detail-value">${p.result?.totalSlabsNeeded || '0'}</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Per Slab</div>
+                      <div class="detail-value">${p.result?.topsPerSlab || '0'} pieces</div>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-label">Efficiency</div>
+                      <div class="detail-value">
+                        <span class="efficiency-badge ${effClass}">
+                          ${p.result?.efficiency?.toFixed(0) || '0'}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  ${p.note ? `
+                    <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border-radius: 8px; font-size: 13px; color: #92400e;">
+                      <strong>Note:</strong> ${p.note}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+          
+          <!-- Footer -->
+          <div class="footer">
+            <div class="footer-content">
+              <p><strong>This quote is valid for 30 days from the date above</strong></p>
+              <p>Prices subject to material availability and final measurements</p>
+              
+              <div class="contact-info">
+                <div class="contact-item">
+                  <span>📞</span>
+                  <span>(555) 123-4567</span>
+                </div>
+                <div class="contact-item">
+                  <span>✉️</span>
+                  <span>quotes@aicsurfaces.com</span>
+                </div>
+                <div class="contact-item">
+                  <span>🌐</span>
+                  <span>www.aicsurfaces.com</span>
+                </div>
+              </div>
+            </div>
+            
+            <p class="tagline">Generated by AIC Surfaces Stone Estimator • Powered by AI Optimization</p>
+          </div>
+        </div>
+        
+        <div class="no-print" style="text-align: center; margin: 40px;">
+          <button onclick="window.print()" style="
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          ">
+            Print / Save as PDF
+          </button>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.focus();
+  };
+
+  const showPrintView = () => {
+    const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2);
+    const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
+    
+    const originalContent = document.body.innerHTML;
+    
+    document.body.innerHTML = `
+      <div style="max-width: 800px; margin: 0 auto; padding: 40px; font-family: -apple-system, sans-serif;">
+        <h1 style="text-align: center; color: #0f766e; font-size: 32px;">AIC SURFACES - QUOTE</h1>
+        <p style="text-align: center; color: #6b7280;">Customer: ${userInfo.name || 'N/A'} | Date: ${new Date().toLocaleDateString()}</p>
+        
+        <div style="margin: 40px 0; padding: 20px; background: #f0fdfa; border-radius: 12px; text-align: center;">
+          <h2 style="color: #0f766e; margin-bottom: 10px;">Total: $${totalPrice}</h2>
+          <p style="color: #14b8a6;">Slabs Required: ${totalSlabs}</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px;">
+          <button onclick="window.print()" style="
+            padding: 16px 40px;
+            background: #0f766e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-right: 10px;
+          ">
+            Print / Save as PDF
+          </button>
+          <button onclick="location.reload()" style="
+            padding: 16px 40px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+          ">
+            Go Back
+          </button>
+        </div>
+      </div>
+    `;
+    
+    window.print();
+  };
+
+  const calculateAll = () => {
+    console.log("Calculate button clicked!");
+    
+    const results = products.map((product) => {
+      const stone = stoneOptions.find(s => s["Stone Type"] === product.stone);
+      if (!stone) return { ...product, result: null };
+
+      const slabCost = parseFloat(stone["Slab Cost"]);
+      const fabCost = parseFloat(stone["Fab Cost"]);
+      const markup = parseFloat(stone["Mark Up"]);
+      const w = parseFloat(product.width);
+      const d = parseFloat(product.depth);
+      const quantity = parseInt(product.quantity);
+
+      if (!w || !d || isNaN(slabCost) || isNaN(fabCost) || isNaN(markup)) return { ...product, result: null };
+
+      const slabWidth = parseFloat(stone["Slab Width"]);
+      const slabHeight = parseFloat(stone["Slab Height"]);
+
+      const pieces = Array(quantity).fill().map((_, i) => ({
+        id: i + 1,
+        width: w,
+        depth: d,
+        name: `${product.stone} #${i + 1}`
+      }));
+
+      const maxPiecesPerSlab = calculateMaxPiecesPerSlab(w, d, slabWidth, slabHeight);
+      
+      const area = w * d;
+      const usableAreaSqft = (area / 144) * quantity;
+      const totalSlabsNeeded = Math.ceil(quantity / maxPiecesPerSlab);
+      const totalSlabArea = totalSlabsNeeded * slabWidth * slabHeight;
+      const totalUsedArea = pieces.reduce((sum, p) => sum + p.width * p.depth, 0);
+      const efficiency = totalSlabArea > 0 ? (totalUsedArea / totalSlabArea) * 100 : 0;
+      
+      const materialCost = (slabCost * totalSlabsNeeded) * (1 + breakageBuffer/100);
+      const fabricationCost = usableAreaSqft * fabCost;
+      const rawCost = materialCost + fabricationCost;
+      const finalPrice = rawCost * markup;
+
+      return {
+        ...product,
+        result: {
+          usableAreaSqft,
+          totalSlabsNeeded,
+          efficiency,
+          materialCost,
+          fabricationCost,
+          rawCost,
+          finalPrice,
+          topsPerSlab: maxPiecesPerSlab
+        }
+      };
+    });
+
+    const updatedProducts = products.map((product, index) => ({
+      ...product,
+      result: results[index]?.result || null
+    }));
+    setProducts(updatedProducts);
+    setAllResults(results);
+    setShowResults(true);
+  };
+
+  const generatePDF = async () => {
+    generateQuotePDF();
+  };
+
+  const sendEmailToClient = async () => {
+    if (!userInfo.email || !userInfo.name) {
+      alert("Please fill in customer name and email first!");
+      return;
+    }
+
+    if (allResults.length === 0) {
+      alert("Please calculate estimates first!");
+      return;
+    }
+
+    setSendingEmail(true);
+    setEmailStatus('Sending email...');
+
+    try {
+      if (!window.emailjs) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+        document.head.appendChild(script);
+        await new Promise(resolve => script.onload = resolve);
+      }
+      
+      window.emailjs.init("GiLTtkDDw2VZi0isD");
+      
+      const totalPrice = allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2);
+      const totalSlabs = allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0);
+      const avgEfficiency = allResults.length > 0 ? 
+        (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
+      
+      // Create beautiful HTML email content matching PDF design
+      const emailHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>AIC Surfaces - Premium Stone Quote</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <!--[if mso]>
+          <noscript>
+            <xml>
+              <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+              </o:OfficeDocumentSettings>
+            </xml>
+          </noscript>
+          <![endif]-->
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+            
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            
+            body { 
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+              color: #1a1a1a;
+              line-height: 1.6;
+              background: #ffffff;
+              margin: 0;
+              padding: 0;
+            }
+            
+            .page-container {
+              max-width: 850px;
+              margin: 0 auto;
+              padding: 40px;
+              background: white;
+            }
+            
+            /* Header Section */
+            .header {
+              display: table;
+              width: 100%;
+              margin-bottom: 40px;
+              padding-bottom: 30px;
+              border-bottom: 3px solid #e5e7eb;
+            }
+            
+            .logo-section {
+              display: table-cell;
+              vertical-align: middle;
+              width: 60%;
+            }
+            
+            .logo {
+              width: 80px;
+              height: 80px;
+              object-fit: cover;
+              border-radius: 12px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              display: inline-block;
+              vertical-align: middle;
+              margin-right: 20px;
+            }
+            
+            .
