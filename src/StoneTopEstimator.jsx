@@ -1976,11 +1976,11 @@ export default function StoneTopEstimator() {
                 This quote is valid for 30 days • Questions? Call (555) 123-4567<br />
                 Generated on ${new Date().toLocaleDateString()} • Powered by AI Optimization
               </p>
-            </div>
-          </div>
-        </div>
-      </body>
-      </html>
+            ${'</div>'}
+          ${'</div>'}
+        ${'</div>'}
+      ${'</body>'}
+      ${'</html>'}
     `;
       
       const templateParams = {
