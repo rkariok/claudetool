@@ -924,27 +924,33 @@ export default function StoneTopEstimator() {
           
           .product-details {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
+            grid-template-columns: repeat(4, minmax(140px, 1fr));
+            gap: 24px;
+            row-gap: 20px;
           }
           
           .detail-item {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 4px;
+            min-width: 0;
           }
           
           .detail-label {
             font-size: 12px;
             color: #6b7280;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
           }
           
           .detail-value {
             font-size: 14px;
             font-weight: 600;
             color: #1f2937;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
           
           .efficiency-badge {
@@ -1229,24 +1235,26 @@ export default function StoneTopEstimator() {
             }
             
             .product-details td {
-              padding: 8px 16px 8px 0;
+              padding: 12px 20px 12px 0;
               vertical-align: top;
               width: 25%;
+              white-space: nowrap;
             }
             
             .detail-label {
               font-size: 12px;
               color: #6b7280;
               text-transform: uppercase;
-              letter-spacing: 0.05em;
+              letter-spacing: 0.08em;
               display: block;
-              margin-bottom: 2px;
+              margin-bottom: 4px;
             }
             
             .detail-value {
               font-size: 14px;
               font-weight: 600;
               color: #1f2937;
+              display: block;
             }
             
             .efficiency-badge {
@@ -1348,201 +1356,8 @@ export default function StoneTopEstimator() {
               }
               .contact-item { display: block; margin: 5px 0; }
             }
-          </style>
-        </head>
-        <body>
-          <div class="page-container">
-            <!-- Header -->
-            <div class="header">
-              <div class="logo-section">
-                <img src="${window.location.origin}/AIC.jpg" alt="AIC Surfaces" class="logo" onerror="this.style.display='none'" />
-                <div class="company-info">
-                  <h1>AIC SURFACES</h1>
-                  <p>PREMIUM STONE FABRICATION</p>
-                </div>
-              </div>
-              <div class="quote-number">
-                <h2>QUOTE #${Date.now().toString().slice(-6)}</h2>
-                <p>${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-              </div>
-            </div>
             
-            <!-- Trust Markers -->
-            <div class="trust-markers">
-              <span class="trust-item">
-                <span class="icon">✓</span>
-                <span>Licensed & Insured</span>
-              </span>
-              <span class="trust-item">
-                <span class="icon">✓</span>
-                <span>20+ Years Experience</span>
-              </span>
-              <span class="trust-item">
-                <span class="icon">✓</span>
-                <span>AI-Optimized Layouts</span>
-              </span>
-              <span class="trust-item">
-                <span class="icon">✓</span>
-                <span>Best Price Guarantee</span>
-              </span>
-            </div>
-            
-            <!-- Customer Information -->
-            <div class="customer-section">
-              <h3>
-                <span>👤</span>
-                Customer Information
-              </h3>
-              <table class="customer-grid">
-                <tr>
-                  <td>
-                    <div class="customer-field">
-                      <label>Full Name</label>
-                      <div class="value">${userInfo.name || 'Not Provided'}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="customer-field">
-                      <label>Email Address</label>
-                      <div class="value">${userInfo.email || 'Not Provided'}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="customer-field">
-                      <label>Phone Number</label>
-                      <div class="value">${userInfo.phone || 'Not Provided'}</div>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </div>
-            
-            <!-- Summary Cards -->
-            <table class="summary-cards">
-              <tr>
-                <td>
-                  <div class="summary-card primary">
-                    <div class="value">${totalPrice}</div>
-                    <div class="label">Total Investment</div>
-                  </div>
-                </td>
-                <td>
-                  <div class="summary-card">
-                    <div class="value">${totalSlabs}</div>
-                    <div class="label">Slabs Required</div>
-                  </div>
-                </td>
-                <td>
-                  <div class="summary-card">
-                    <div class="value">${avgEfficiency}%</div>
-                    <div class="label">Avg. Efficiency</div>
-                  </div>
-                </td>
-              </tr>
-            </table>
-            
-            <!-- Products -->
-            <div class="products-section">
-              <div class="section-header">
-                <span style="font-size: 24px;">📦</span>
-                <h3>Quote Details</h3>
-              </div>
-              
-              ${allResults.map((p, i) => {
-                const effClass = p.result?.efficiency > 80 ? 'efficiency-high' : 
-                                p.result?.efficiency > 60 ? 'efficiency-medium' : 'efficiency-low';
-                return `
-                  <div class="product-card">
-                    <table class="product-header">
-                      <tr>
-                        <td>
-                          <div class="product-name">${p.customName || `Product ${i + 1}`}</div>
-                        </td>
-                        <td>
-                          <div class="product-price">${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
-                        </td>
-                      </tr>
-                    </table>
-                    <table class="product-details">
-                      <tr>
-                        <td>
-                          <div class="detail-label">Stone Type</div>
-                          <div class="detail-value">${p.stone}</div>
-                        </td>
-                        <td>
-                          <div class="detail-label">Dimensions</div>
-                          <div class="detail-value">${p.width}" × ${p.depth}"</div>
-                        </td>
-                        <td>
-                          <div class="detail-label">Quantity</div>
-                          <div class="detail-value">${p.quantity} pieces</div>
-                        </td>
-                        <td>
-                          <div class="detail-label">Edge Detail</div>
-                          <div class="detail-value">${p.edgeDetail}</div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <div class="detail-label">Area</div>
-                          <div class="detail-value">${p.result?.usableAreaSqft?.toFixed(1) || '0'} sq ft</div>
-                        </td>
-                        <td>
-                          <div class="detail-label">Slabs</div>
-                          <div class="detail-value">${p.result?.totalSlabsNeeded || '0'}</div>
-                        </td>
-                        <td>
-                          <div class="detail-label">Per Slab</div>
-                          <div class="detail-value">${p.result?.topsPerSlab || '0'} pieces</div>
-                        </td>
-                        <td>
-                          <div class="detail-label">Efficiency</div>
-                          <div class="detail-value">
-                            <span class="efficiency-badge ${effClass}">
-                              ${p.result?.efficiency?.toFixed(0) || '0'}%
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    </table>
-                    ${p.note ? `
-                      <div class="product-note">
-                        <strong>Note:</strong> ${p.note}
-                      </div>
-                    ` : ''}
-                  </div>
-                `;
-              }).join('')}
-            </div>
-            
-            <!-- Footer -->
-            <div class="footer">
-              <div class="footer-content">
-                <p><strong>This quote is valid for 30 days from the date above</strong></p>
-                <p>Prices subject to material availability and final measurements</p>
-                
-                <div class="contact-info">
-                  <span class="contact-item">
-                    <span>📞</span>
-                    <span>(555) 123-4567</span>
-                  </span>
-                  <span class="contact-item">
-                    <span>✉️</span>
-                    <span>quotes@aicsurfaces.com</span>
-                  </span>
-                  <span class="contact-item">
-                    <span>🌐</span>
-                    <span>www.aicsurfaces.com</span>
-                  </span>
-                </div>
-              </div>
-              
-              <p class="tagline">Generated by AIC Surfaces Stone Estimator • Powered by AI Optimization</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;no-print { display: none !important; }
+            .no-print { display: none !important; }
             body { background: white; }
             .page-container { padding: 20px; }
           }
@@ -1567,22 +1382,22 @@ export default function StoneTopEstimator() {
           
           <!-- Trust Markers -->
           <div class="trust-markers">
-            <div class="trust-item">
+            <span class="trust-item">
               <span class="icon">✓</span>
               <span>Licensed & Insured</span>
-            </div>
-            <div class="trust-item">
+            </span>
+            <span class="trust-item">
               <span class="icon">✓</span>
               <span>20+ Years Experience</span>
-            </div>
-            <div class="trust-item">
+            </span>
+            <span class="trust-item">
               <span class="icon">✓</span>
               <span>AI-Optimized Layouts</span>
-            </div>
-            <div class="trust-item">
+            </span>
+            <span class="trust-item">
               <span class="icon">✓</span>
               <span>Best Price Guarantee</span>
-            </div>
+            </span>
           </div>
           
           <!-- Customer Information -->
@@ -1591,37 +1406,53 @@ export default function StoneTopEstimator() {
               <span>👤</span>
               Customer Information
             </h3>
-            <div class="customer-grid">
-              <div class="customer-field">
-                <label>Full Name</label>
-                <value>${userInfo.name || 'Not Provided'}</value>
-              </div>
-              <div class="customer-field">
-                <label>Email Address</label>
-                <value>${userInfo.email || 'Not Provided'}</value>
-              </div>
-              <div class="customer-field">
-                <label>Phone Number</label>
-                <value>${userInfo.phone || 'Not Provided'}</value>
-              </div>
-            </div>
+            <table class="customer-grid">
+              <tr>
+                <td>
+                  <div class="customer-field">
+                    <label>Full Name</label>
+                    <div class="value">${userInfo.name || 'Not Provided'}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="customer-field">
+                    <label>Email Address</label>
+                    <div class="value">${userInfo.email || 'Not Provided'}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="customer-field">
+                    <label>Phone Number</label>
+                    <div class="value">${userInfo.phone || 'Not Provided'}</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
           </div>
           
           <!-- Summary Cards -->
-          <div class="summary-cards">
-            <div class="summary-card primary">
-              <div class="value">$${totalPrice}</div>
-              <div class="label">Total Investment</div>
-            </div>
-            <div class="summary-card">
-              <div class="value">${totalSlabs}</div>
-              <div class="label">Slabs Required</div>
-            </div>
-            <div class="summary-card">
-              <div class="value">${avgEfficiency}%</div>
-              <div class="label">Avg. Efficiency</div>
-            </div>
-          </div>
+          <table class="summary-cards">
+            <tr>
+              <td>
+                <div class="summary-card primary">
+                  <div class="value">$${totalPrice}</div>
+                  <div class="label">Total Investment</div>
+                </div>
+              </td>
+              <td>
+                <div class="summary-card">
+                  <div class="value">${totalSlabs}</div>
+                  <div class="label">Slabs Required</div>
+                </div>
+              </td>
+              <td>
+                <div class="summary-card">
+                  <div class="value">${avgEfficiency}%</div>
+                  <div class="label">Avg. Efficiency</div>
+                </div>
+              </td>
+            </tr>
+          </table>
           
           <!-- Products -->
           <div class="products-section">
@@ -1635,50 +1466,60 @@ export default function StoneTopEstimator() {
                               p.result?.efficiency > 60 ? 'efficiency-medium' : 'efficiency-low';
               return `
                 <div class="product-card">
-                  <div class="product-header">
-                    <div class="product-name">${p.customName || `Product ${i + 1}`}</div>
-                    <div class="product-price">$${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
-                  </div>
-                  <div class="product-details">
-                    <div class="detail-item">
-                      <div class="detail-label">Stone Type</div>
-                      <div class="detail-value">${p.stone}</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Dimensions</div>
-                      <div class="detail-value">${p.width}" × ${p.depth}"</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Quantity</div>
-                      <div class="detail-value">${p.quantity} pieces</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Edge Detail</div>
-                      <div class="detail-value">${p.edgeDetail}</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Area</div>
-                      <div class="detail-value">${p.result?.usableAreaSqft?.toFixed(1) || '0'} sq ft</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Slabs</div>
-                      <div class="detail-value">${p.result?.totalSlabsNeeded || '0'}</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Per Slab</div>
-                      <div class="detail-value">${p.result?.topsPerSlab || '0'} pieces</div>
-                    </div>
-                    <div class="detail-item">
-                      <div class="detail-label">Efficiency</div>
-                      <div class="detail-value">
-                        <span class="efficiency-badge ${effClass}">
-                          ${p.result?.efficiency?.toFixed(0) || '0'}%
+                  <table class="product-header">
+                    <tr>
+                      <td>
+                        <div class="product-name">${p.customName || `Product ${i + 1}`}</div>
+                      </td>
+                      <td>
+                        <div class="product-price">$${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
+                      </td>
+                    </tr>
+                  </table>
+                  <table class="product-details">
+                    <tr>
+                      <td style="padding-right: 25px;">
+                        <span class="detail-label">Stone Type</span>
+                        <span class="detail-value">${p.stone}</span>
+                      </td>
+                      <td style="padding-right: 25px;">
+                        <span class="detail-label">Dimensions</span>
+                        <span class="detail-value">${p.width}" × ${p.depth}"</span>
+                      </td>
+                      <td style="padding-right: 25px;">
+                        <span class="detail-label">Quantity</span>
+                        <span class="detail-value">${p.quantity} pieces</span>
+                      </td>
+                      <td>
+                        <span class="detail-label">Edge Detail</span>
+                        <span class="detail-value">${p.edgeDetail}</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding-right: 25px;">
+                        <span class="detail-label">Area</span>
+                        <span class="detail-value">${p.result?.usableAreaSqft?.toFixed(1) || '0'} sq ft</span>
+                      </td>
+                      <td style="padding-right: 25px;">
+                        <span class="detail-label">Slabs</span>
+                        <span class="detail-value">${p.result?.totalSlabsNeeded || '0'}</span>
+                      </td>
+                      <td style="padding-right: 25px;">
+                        <span class="detail-label">Per Slab</span>
+                        <span class="detail-value">${p.result?.topsPerSlab || '0'} pieces</span>
+                      </td>
+                      <td>
+                        <span class="detail-label">Efficiency</span>
+                        <span class="detail-value">
+                          <span class="efficiency-badge ${effClass}">
+                            ${p.result?.efficiency?.toFixed(0) || '0'}%
+                          </span>
                         </span>
-                      </div>
-                    </div>
-                  </div>
+                      </td>
+                    </tr>
+                  </table>
                   ${p.note ? `
-                    <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border-radius: 8px; font-size: 13px; color: #92400e;">
+                    <div class="product-note">
                       <strong>Note:</strong> ${p.note}
                     </div>
                   ` : ''}
@@ -1694,18 +1535,18 @@ export default function StoneTopEstimator() {
               <p>Prices subject to material availability and final measurements</p>
               
               <div class="contact-info">
-                <div class="contact-item">
+                <span class="contact-item">
                   <span>📞</span>
                   <span>(555) 123-4567</span>
-                </div>
-                <div class="contact-item">
+                </span>
+                <span class="contact-item">
                   <span>✉️</span>
                   <span>quotes@aicsurfaces.com</span>
-                </div>
-                <div class="contact-item">
+                </span>
+                <span class="contact-item">
                   <span>🌐</span>
                   <span>www.aicsurfaces.com</span>
-                </div>
+                </span>
               </div>
             </div>
             
@@ -1749,7 +1590,7 @@ export default function StoneTopEstimator() {
         <p style="text-align: center; color: #6b7280;">Customer: ${userInfo.name || 'N/A'} | Date: ${new Date().toLocaleDateString()}</p>
         
         <div style="margin: 40px 0; padding: 20px; background: #f0fdfa; border-radius: 12px; text-align: center;">
-          <h2 style="color: #0f766e; margin-bottom: 10px;">Total: $${totalPrice}</h2>
+          <h2 style="color: #0f766e; margin-bottom: 10px;">Total: ${totalPrice}</h2>
           <p style="color: #14b8a6;">Slabs Required: ${totalSlabs}</p>
         </div>
         
@@ -1889,60 +1730,709 @@ export default function StoneTopEstimator() {
           <title>AIC Surfaces - Premium Stone Quote</title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <!--[if mso]>
-          <noscript>
-            <xml>
-              <o:OfficeDocumentSettings>
-                <o:PixelsPerInch>96</o:PixelsPerInch>
-              </o:OfficeDocumentSettings>
-            </xml>
-          </noscript>
-          <![endif]-->
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #f9fafb;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); padding: 40px 30px; text-align: center;">
+              <h1 style="color: #ffffff; font-size: 36px; margin: 0 0 10px 0; font-family: 'Playfair Display', serif;">AIC SURFACES</h1>
+              <p style="color: #a7f3d0; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Premium Stone Fabrication</p>
+            </div>
             
-            * { margin: 0; padding: 0; box-sizing: border-box; }
+            <!-- Quote Number -->
+            <div style="padding: 30px; border-bottom: 1px solid #e5e7eb;">
+              <div style="text-align: center;">
+                <h2 style="color: #0f766e; font-size: 24px; margin: 0 0 5px 0;">QUOTE #${Date.now().toString().slice(-6)}</h2>
+                <p style="color: #6b7280; font-size: 14px; margin: 0;">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              </div>
+            </div>
             
-            body { 
-              font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-              color: #1a1a1a;
-              line-height: 1.6;
-              background: #ffffff;
-              margin: 0;
-              padding: 0;
-            }
+            <!-- Customer Info -->
+            <div style="padding: 30px; background-color: #f9fafb;">
+              <h3 style="color: #1f2937; font-size: 18px; margin: 0 0 20px 0;">Customer Information</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 5px 0;">
+                    <span style="color: #6b7280; font-size: 12px; text-transform: uppercase;">Name:</span><br>
+                    <strong style="color: #1f2937; font-size: 16px;">${userInfo.name}</strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0;">
+                    <span style="color: #6b7280; font-size: 12px; text-transform: uppercase;">Email:</span><br>
+                    <strong style="color: #1f2937; font-size: 16px;">${userInfo.email}</strong>
+                  </td>
+                </tr>
+                ${userInfo.phone ? `
+                <tr>
+                  <td style="padding: 5px 0;">
+                    <span style="color: #6b7280; font-size: 12px; text-transform: uppercase;">Phone:</span><br>
+                    <strong style="color: #1f2937; font-size: 16px;">${userInfo.phone}</strong>
+                  </td>
+                </tr>
+                ` : ''}
+              </table>
+            </div>
             
-            .page-container {
-              max-width: 850px;
-              margin: 0 auto;
-              padding: 40px;
-              background: white;
-            }
+            <!-- Summary -->
+            <div style="padding: 30px; text-align: center;">
+              <div style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 20px;">
+                <h3 style="font-size: 14px; margin: 0 0 10px 0; color: #a7f3d0; text-transform: uppercase;">Total Investment</h3>
+                <p style="font-size: 48px; font-weight: 700; margin: 0;">${totalPrice}</p>
+              </div>
+              
+              <div style="display: inline-block; margin: 0 10px;">
+                <p style="color: #6b7280; font-size: 14px; margin: 0 0 5px 0;">Slabs Required</p>
+                <p style="color: #0f766e; font-size: 28px; font-weight: 600; margin: 0;">${totalSlabs}</p>
+              </div>
+              
+              <div style="display: inline-block; margin: 0 10px;">
+                <p style="color: #6b7280; font-size: 14px; margin: 0 0 5px 0;">Avg. Efficiency</p>
+                <p style="color: #0f766e; font-size: 28px; font-weight: 600; margin: 0;">${avgEfficiency}%</p>
+              </div>
+            </div>
             
-            /* Header Section */
-            .header {
-              display: table;
-              width: 100%;
-              margin-bottom: 40px;
-              padding-bottom: 30px;
-              border-bottom: 3px solid #e5e7eb;
-            }
+            <!-- Products Summary -->
+            <div style="padding: 30px; background-color: #f9fafb;">
+              <h3 style="color: #1f2937; font-size: 18px; margin: 0 0 20px 0;">Quote Details</h3>
+              ${allResults.map((p, i) => `
+                <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h4 style="color: #1f2937; font-size: 16px; margin: 0;">${p.customName || `Product ${i + 1}`}</h4>
+                    <span style="color: #059669; font-size: 20px; font-weight: 600;">${p.result?.finalPrice?.toFixed(2) || '0.00'}</span>
+                  </div>
+                  <table style="width: 100%; font-size: 14px;">
+                    <tr>
+                      <td style="color: #6b7280; padding: 3px 0;">Stone:</td>
+                      <td style="color: #1f2937; font-weight: 500;">${p.stone}</td>
+                      <td style="color: #6b7280; padding: 3px 0;">Size:</td>
+                      <td style="color: #1f2937; font-weight: 500;">${p.width}" × ${p.depth}"</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #6b7280; padding: 3px 0;">Qty:</td>
+                      <td style="color: #1f2937; font-weight: 500;">${p.quantity}</td>
+                      <td style="color: #6b7280; padding: 3px 0;">Edge:</td>
+                      <td style="color: #1f2937; font-weight: 500;">${p.edgeDetail}</td>
+                    </tr>
+                  </table>
+                </div>
+              `).join('')}
+            </div>
             
-            .logo-section {
-              display: table-cell;
-              vertical-align: middle;
-              width: 60%;
-            }
+            <!-- CTA Button -->
+            <div style="padding: 40px 30px; text-align: center; background-color: #f0fdfa;">
+              <p style="color: #0f766e; font-size: 18px; margin: 0 0 20px 0; font-weight: 500;">Ready to move forward with your project?</p>
+              <a href="tel:5551234567" style="display: inline-block; background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                Call Us: (555) 123-4567
+              </a>
+            </div>
             
-            .logo {
-              width: 80px;
-              height: 80px;
-              object-fit: cover;
-              border-radius: 12px;
-              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-              display: inline-block;
-              vertical-align: middle;
-              margin-right: 20px;
-            }
+            <!-- Footer -->
+            <div style="background-color: #1f2937; color: #9ca3af; padding: 30px; text-align: center; font-size: 12px;">
+              <p style="margin: 0 0 10px 0;">This quote is valid for 30 days • Prices subject to material availability</p>
+              <p style="margin: 0;">© 2024 AIC Surfaces • Premium Stone Fabrication</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+      
+      const templateParams = {
+        to_name: userInfo.name,
+        to_email: userInfo.email,
+        from_name: "AIC Surfaces",
+        from_email: "quotes@aicsurfaces.com",
+        subject: `Your Stone Quote #${Date.now().toString().slice(-6)} - AIC Surfaces`,
+        message_html: emailHTML,
+        total_price: totalPrice,
+        total_slabs: totalSlabs,
+        quote_number: Date.now().toString().slice(-6)
+      };
+      
+      const response = await window.emailjs.send(
+        'service_4qpb1om',
+        'template_7p9wv5k',
+        templateParams
+      );
+      
+      if (response.status === 200) {
+        setEmailStatus('Email sent successfully! ✅');
+        alert(`Email sent successfully to ${userInfo.email}!`);
+      } else {
+        throw new Error('Email send failed');
+      }
+      
+    } catch (error) {
+      console.error('Email error:', error);
+      setEmailStatus('Failed to send email ❌');
+      alert('Failed to send email. Please try again or contact support.');
+    } finally {
+      setSendingEmail(false);
+      setTimeout(() => setEmailStatus(''), 5000);
+    }
+  };
+
+  // Main JSX Return
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-8 animate-fade-in">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-3">
+            <Calculator className="w-10 h-10 text-teal-600" />
+            AIC Surfaces Stone Estimator
+          </h1>
+          <p className="text-gray-600">AI-powered optimization for maximum material efficiency</p>
+          
+          <div className="mt-4 flex justify-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSavedQuotes(!showSavedQuotes)}
+            >
+              <FolderOpen className="w-4 h-4" />
+              Saved Quotes ({savedQuotes.length})
+            </Button>
             
-            .
+            {products.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={saveQuote}
+              >
+                <Save className="w-4 h-4" />
+                Save Quote
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Saved Quotes Modal */}
+        {showSavedQuotes && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+              <div className="p-6 border-b">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold">Saved Quotes</h2>
+                  <button
+                    onClick={() => setShowSavedQuotes(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6 overflow-y-auto max-h-[60vh]">
+                {savedQuotes.length === 0 ? (
+                  <p className="text-gray-500 text-center">No saved quotes yet</p>
+                ) : (
+                  <div className="space-y-3">
+                    {savedQuotes.map(quote => (
+                      <div key={quote.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold">{quote.name}</h3>
+                            <p className="text-sm text-gray-600">
+                              {new Date(quote.date).toLocaleDateString()} • 
+                              {quote.products.length} products • 
+                              Customer: {quote.userInfo.name || 'Not specified'}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => loadQuote(quote)}
+                            >
+                              Load
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              onClick={() => deleteQuote(quote.id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Customer Information */}
+        <Card className="mb-6">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Info className="w-5 h-5 text-teal-600" />
+              Customer Information
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  value={userInfo.name}
+                  onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={userInfo.email}
+                  onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  placeholder="john@example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={userInfo.phone}
+                  onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Products Section */}
+        <Card className="mb-6">
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Package className="w-5 h-5 text-teal-600" />
+                Products
+              </h2>
+              <Button onClick={addProduct} size="sm">
+                <Plus className="w-4 h-4" />
+                Add Product
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {products.map((product, index) => (
+                <div key={product.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-gray-600">
+                        Product {index + 1}
+                      </span>
+                      {product.aiExtracted && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+                          <Sparkles className="w-3 h-3" />
+                          AI Extracted
+                        </span>
+                      )}
+                    </div>
+                    {products.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeProduct(index)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Custom Name (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={product.customName}
+                        onChange={(e) => updateProduct(index, 'customName', e.target.value)}
+                        placeholder="Kitchen Island"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                      />
+                    </div>
+                    
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Stone Type</label>
+                      <select
+                        value={product.stone}
+                        onChange={(e) => updateProduct(index, 'stone', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                      >
+                        {stoneOptions.map((stone) => (
+                          <option key={stone["Stone Type"]} value={stone["Stone Type"]}>
+                            {stone["Stone Type"]}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Width"</label>
+                      <input
+                        type="number"
+                        value={product.width}
+                        onChange={(e) => updateProduct(index, 'width', e.target.value)}
+                        placeholder="36"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Depth"</label>
+                      <input
+                        type="number"
+                        value={product.depth}
+                        onChange={(e) => updateProduct(index, 'depth', e.target.value)}
+                        placeholder="24"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                      <input
+                        type="number"
+                        value={product.quantity}
+                        onChange={(e) => updateProduct(index, 'quantity', e.target.value)}
+                        min="1"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Edge Detail</label>
+                      <select
+                        value={product.edgeDetail}
+                        onChange={(e) => updateProduct(index, 'edgeDetail', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                      >
+                        <option>Eased</option>
+                        <option>Beveled</option>
+                        <option>Bullnose</option>
+                        <option>Ogee</option>
+                        <option>Straight</option>
+                      </select>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <span className="flex items-center gap-1">
+                          <Upload className="w-3 h-3" />
+                          Upload Drawing (AI Analysis)
+                        </span>
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={(e) => handleDrawingUpload(e, index)}
+                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
+                        disabled={loadingAI}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                    <input
+                      type="text"
+                      value={product.note}
+                      onChange={(e) => updateProduct(index, 'note', e.target.value)}
+                      placeholder="Special instructions or notes..."
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        {/* Advanced Settings */}
+        <Card className="mb-6">
+          <div className="p-6">
+            <button
+              onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+              className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium"
+            >
+              <ChevronRight className={`w-4 h-4 transition-transform ${showAdvancedSettings ? 'rotate-90' : ''}`} />
+              Advanced Settings
+            </button>
+            
+            {showAdvancedSettings && (
+              <div className="mt-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Toggle
+                    label="Include Kerf Width"
+                    checked={includeKerf}
+                    onChange={() => setIncludeKerf(!includeKerf)}
+                  />
+                  
+                  {includeKerf && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Kerf Width (inches)
+                      </label>
+                      <input
+                        type="number"
+                        value={kerfWidth}
+                        onChange={(e) => setKerfWidth(parseFloat(e.target.value) || 0)}
+                        step="0.0625"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                      />
+                    </div>
+                  )}
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Breakage Buffer (%)
+                    </label>
+                    <input
+                      type="number"
+                      value={breakageBuffer}
+                      onChange={(e) => setBreakageBuffer(parseInt(e.target.value) || 0)}
+                      min="0"
+                      max="50"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <Toggle
+                  label="Show Visual Layouts"
+                  checked={showVisualLayouts}
+                  onChange={() => setShowVisualLayouts(!showVisualLayouts)}
+                />
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Calculate Button */}
+        <div className="text-center mb-8">
+          <Button onClick={calculateAll} size="lg" className="shadow-lg">
+            <Calculator className="w-5 h-5" />
+            Calculate Estimates
+          </Button>
+        </div>
+
+        {/* Results Section */}
+        {showResults && allResults.length > 0 && (
+          <div className="space-y-6 animate-fade-in">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <div className="p-6 text-center">
+                  <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                  <h3 className="text-sm font-medium text-gray-600 mb-1">Total Investment</h3>
+                  <p className="text-3xl font-bold text-gray-800">
+                    ${allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2)}
+                  </p>
+                </div>
+              </Card>
+              
+              <Card>
+                <div className="p-6 text-center">
+                  <Package className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                  <h3 className="text-sm font-medium text-gray-600 mb-1">Total Slabs Needed</h3>
+                  <p className="text-3xl font-bold text-gray-800">
+                    {allResults.reduce((sum, p) => sum + (p.result?.totalSlabsNeeded || 0), 0)}
+                  </p>
+                </div>
+              </Card>
+              
+              <Card>
+                <div className="p-6 text-center">
+                  <TrendingUp className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                  <h3 className="text-sm font-medium text-gray-600 mb-1">Average Efficiency</h3>
+                  <p className="text-3xl font-bold text-gray-800">
+                    {allResults.length > 0 ? 
+                      (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0'}%
+                  </p>
+                </div>
+              </Card>
+            </div>
+
+            {/* Individual Product Results */}
+            {allResults.map((product, index) => {
+              if (!product.result) return null;
+              
+              const stone = stoneOptions.find(s => s["Stone Type"] === product.stone);
+              const pieces = Array(product.quantity).fill().map((_, i) => ({
+                id: i + 1,
+                width: parseFloat(product.width),
+                depth: parseFloat(product.depth),
+                name: `Piece ${i + 1}`
+              }));
+
+              return (
+                <Card key={product.id}>
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-800">
+                          {product.customName || `Product ${index + 1}`}
+                        </h3>
+                        <p className="text-sm text-gray-600">{product.stone}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-green-600">
+                          ${product.result.finalPrice.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-gray-600">Total Price</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-600">Dimensions</p>
+                        <p className="font-semibold">{product.width}" × {product.depth}"</p>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-600">Quantity</p>
+                        <p className="font-semibold">{product.quantity} pieces</p>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-600">Total Area</p>
+                        <p className="font-semibold">{product.result.usableAreaSqft.toFixed(1)} sq ft</p>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-600">Slabs Needed</p>
+                        <p className="font-semibold">{product.result.totalSlabsNeeded}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-medium text-gray-700 mb-3 flex items-center gap-2">
+                          <BarChart3 className="w-4 h-4" />
+                          Cost Breakdown
+                        </h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Material Cost:</span>
+                            <span className="font-medium">${product.result.materialCost.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Fabrication Cost:</span>
+                            <span className="font-medium">${product.result.fabricationCost.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm pt-2 border-t">
+                            <span className="text-gray-600">Subtotal:</span>
+                            <span className="font-medium">${product.result.rawCost.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Markup:</span>
+                            <span className="font-medium">{((stone?.["Mark Up"] - 1) * 100).toFixed(0)}%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium text-gray-700 mb-3 flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4" />
+                          Efficiency Metrics
+                        </h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Pieces per Slab:</span>
+                            <span className="font-medium">{product.result.topsPerSlab}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Material Efficiency:</span>
+                            <span className={`font-medium ${
+                              product.result.efficiency > 80 ? 'text-green-600' :
+                              product.result.efficiency > 60 ? 'text-yellow-600' :
+                              'text-red-600'
+                            }`}>
+                              {product.result.efficiency.toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Edge Detail:</span>
+                            <span className="font-medium">{product.edgeDetail}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {showVisualLayouts && stone && (
+                      <div className="mt-6 pt-6 border-t">
+                        <h4 className="font-medium text-gray-700 mb-4 flex items-center gap-2">
+                          <Package className="w-4 h-4" />
+                          Visual Layout Optimization
+                        </h4>
+                        <SlabLayoutVisualization
+                          pieces={pieces}
+                          slabWidth={parseFloat(stone["Slab Width"])}
+                          slabHeight={parseFloat(stone["Slab Height"])}
+                          maxPiecesPerSlab={product.result.topsPerSlab}
+                          includeKerf={includeKerf}
+                          kerfWidth={kerfWidth}
+                        />
+                      </div>
+                    )}
+
+                    {product.note && (
+                      <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-sm text-yellow-800">
+                          <strong>Note:</strong> {product.note}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+
+            {/* Action Buttons */}
+            <div className="flex justify-center gap-4 mt-8">
+              <Button onClick={generatePDF} size="lg">
+                <FileText className="w-5 h-5" />
+                Generate PDF Quote
+              </Button>
+              
+              <Button 
+                onClick={sendEmailToClient} 
+                size="lg" 
+                disabled={sendingEmail || !userInfo.email}
+                className={sendingEmail ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                <Mail className="w-5 h-5" />
+                {sendingEmail ? 'Sending...' : 'Email Quote'}
+              </Button>
+            </div>
+
+            {emailStatus && (
+              <div className="text-center mt-4">
+                <p className={`text-sm ${emailStatus.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+                  {emailStatus}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Loading Overlay */}
+        {loadingAI && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-8 max-w-sm mx-auto text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-teal-600 mx-auto mb-4"></div>
+              <h3 className="text-xl font-semibold mb-2">AI Analysis in Progress</h3>
+              <p className="text-gray-600">Claude is analyzing your drawing...</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
