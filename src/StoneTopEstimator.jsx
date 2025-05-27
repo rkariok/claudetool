@@ -1350,14 +1350,570 @@ export default function StoneTopEstimator() {
       const avgEfficiency = allResults.length > 0 ? 
         (allResults.reduce((sum, p) => sum + (p.result?.efficiency || 0), 0) / allResults.length).toFixed(1) : '0';
       
-      // Create beautiful HTML email content
+      // Create beautiful HTML email content matching PDF design
       const emailHTML = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
-            <img src="${window.location.origin}/AIC.jpg" alt="AIC Surfaces" style="width: 80px; height: 80px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
-            <h1 style="color: white; margin: 0; font-size: 32px;">AIC SURFACES</h1>
-            <p style="color: #a7f3d0; margin: 10px 0 0 0; font-size: 14px; letter-spacing: 2px;">PREMIUM STONE QUOTE</p>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>AIC Surfaces Quote</title>
+          <!--[if mso]>
+          <noscript>
+            <xml>
+              <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+              </o:OfficeDocumentSettings>
+            </xml>
+          </noscript>
+          <![endif]-->
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+            
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            
+            body { 
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+              color: #1a1a1a;
+              line-height: 1.6;
+              background-color: #f5f5f5;
+            }
+            
+            .email-container {
+              max-width: 850px;
+              margin: 0 auto;
+              background-color: #ffffff;
+            }
+            
+            .email-content {
+              padding: 40px;
+            }
+            
+            /* Header Section */
+            .header {
+              display: table;
+              width: 100%;
+              margin-bottom: 40px;
+              padding-bottom: 30px;
+              border-bottom: 3px solid #e5e7eb;
+            }
+            
+            .logo-section {
+              display: table-cell;
+              vertical-align: middle;
+              width: 50%;
+            }
+            
+            .logo {
+              width: 80px;
+              height: 80px;
+              object-fit: cover;
+              border-radius: 12px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              display: inline-block;
+              vertical-align: middle;
+              margin-right: 20px;
+            }
+            
+            .company-info {
+              display: inline-block;
+              vertical-align: middle;
+            }
+            
+            .company-info h1 {
+              font-family: 'Playfair Display', Georgia, serif;
+              font-size: 32px;
+              color: #0f766e;
+              margin-bottom: 4px;
+            }
+            
+            .company-info p {
+              color: #6b7280;
+              font-size: 14px;
+              font-weight: 500;
+              letter-spacing: 0.05em;
+              text-transform: uppercase;
+            }
+            
+            .quote-info {
+              display: table-cell;
+              text-align: right;
+              vertical-align: middle;
+              width: 50%;
+            }
+            
+            .quote-info h2 {
+              font-size: 24px;
+              color: #0f766e;
+              font-weight: 600;
+              margin-bottom: 4px;
+            }
+            
+            .quote-info p {
+              color: #6b7280;
+              font-size: 14px;
+            }
+            
+            /* Trust Markers */
+            .trust-markers {
+              background: #f0fdfa;
+              border: 1px solid #5eead4;
+              border-radius: 12px;
+              padding: 16px 24px;
+              margin-bottom: 30px;
+              text-align: center;
+            }
+            
+            .trust-item {
+              display: inline-block;
+              margin: 0 15px;
+              font-size: 14px;
+              color: #0f766e;
+              font-weight: 500;
+            }
+            
+            .trust-item .icon {
+              color: #10b981;
+              font-weight: bold;
+            }
+            
+            /* Customer Section */
+            .customer-section {
+              background: #f9fafb;
+              border-radius: 12px;
+              padding: 24px;
+              margin-bottom: 30px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .customer-section h3 {
+              font-size: 18px;
+              font-weight: 600;
+              color: #1f2937;
+              margin-bottom: 16px;
+            }
+            
+            .customer-grid {
+              width: 100%;
+            }
+            
+            .customer-grid td {
+              padding: 8px 20px 8px 0;
+              vertical-align: top;
+            }
+            
+            .customer-field label {
+              font-size: 12px;
+              font-weight: 500;
+              color: #6b7280;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+              display: block;
+              margin-bottom: 4px;
+            }
+            
+            .customer-field .value {
+              font-size: 16px;
+              color: #1f2937;
+              font-weight: 500;
+            }
+            
+            /* Summary Cards */
+            .summary-cards {
+              margin-bottom: 30px;
+              width: 100%;
+            }
+            
+            .summary-cards td {
+              padding: 10px;
+              width: 33.333%;
+            }
+            
+            .summary-card {
+              background: white;
+              border: 2px solid #e5e7eb;
+              border-radius: 12px;
+              padding: 24px;
+              text-align: center;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .summary-card.primary {
+              background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+              color: white;
+              border: none;
+            }
+            
+            .summary-card .value {
+              font-size: 32px;
+              font-weight: 700;
+              margin-bottom: 4px;
+              line-height: 1;
+            }
+            
+            .summary-card .label {
+              font-size: 13px;
+              font-weight: 500;
+              color: #6b7280;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .summary-card.primary .label {
+              color: #a7f3d0;
+            }
+            
+            /* Products Section */
+            .products-section {
+              margin-bottom: 30px;
+            }
+            
+            .section-header {
+              margin-bottom: 20px;
+            }
+            
+            .section-header h3 {
+              font-size: 20px;
+              font-weight: 600;
+              color: #1f2937;
+              display: inline;
+              margin-left: 8px;
+            }
+            
+            .product-card {
+              background: white;
+              border: 1px solid #e5e7eb;
+              border-radius: 12px;
+              padding: 20px;
+              margin-bottom: 16px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            }
+            
+            .product-header {
+              margin-bottom: 16px;
+            }
+            
+            .product-header td {
+              vertical-align: middle;
+            }
+            
+            .product-name {
+              font-size: 18px;
+              font-weight: 600;
+              color: #1f2937;
+            }
+            
+            .product-price {
+              font-size: 24px;
+              font-weight: 700;
+              color: #059669;
+              text-align: right;
+            }
+            
+            .product-details {
+              width: 100%;
+              font-size: 14px;
+            }
+            
+            .product-details td {
+              padding: 8px 16px 8px 0;
+              vertical-align: top;
+            }
+            
+            .detail-label {
+              font-size: 12px;
+              color: #6b7280;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+              display: block;
+              margin-bottom: 2px;
+            }
+            
+            .detail-value {
+              font-size: 14px;
+              font-weight: 600;
+              color: #1f2937;
+            }
+            
+            .efficiency-badge {
+              display: inline-block;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 12px;
+              font-weight: 600;
+            }
+            
+            .efficiency-high {
+              background: #d1fae5;
+              color: #065f46;
+            }
+            
+            .efficiency-medium {
+              background: #fef3c7;
+              color: #92400e;
+            }
+            
+            .efficiency-low {
+              background: #fee2e2;
+              color: #991b1b;
+            }
+            
+            .product-note {
+              margin-top: 12px;
+              padding: 12px;
+              background: #fef3c7;
+              border-radius: 8px;
+              font-size: 13px;
+              color: #92400e;
+            }
+            
+            /* CTA Button */
+            .cta-section {
+              text-align: center;
+              margin: 40px 0;
+            }
+            
+            .cta-button {
+              display: inline-block;
+              background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+              color: white;
+              padding: 16px 40px;
+              text-decoration: none;
+              border-radius: 8px;
+              font-weight: bold;
+              font-size: 16px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+            
+            /* Footer Section */
+            .footer {
+              margin-top: 60px;
+              padding-top: 30px;
+              border-top: 2px solid #e5e7eb;
+              text-align: center;
+            }
+            
+            .footer p {
+              color: #6b7280;
+              font-size: 14px;
+              margin-bottom: 8px;
+            }
+            
+            .contact-info {
+              margin: 20px 0;
+            }
+            
+            .contact-item {
+              display: inline-block;
+              margin: 0 15px;
+              color: #4b5563;
+              font-size: 14px;
+            }
+            
+            .tagline {
+              font-style: italic;
+              color: #9ca3af;
+              font-size: 13px;
+              margin-top: 20px;
+            }
+            
+            /* Mobile Responsive */
+            @media only screen and (max-width: 600px) {
+              .email-content { padding: 20px; }
+              .header { display: block; }
+              .logo-section, .quote-info { display: block; width: 100%; text-align: center; margin-bottom: 20px; }
+              .company-info h1 { font-size: 24px; }
+              .trust-item { display: block; margin: 5px 0; }
+              .summary-cards td { display: block; width: 100%; padding: 5px; }
+              .product-details td { display: block; width: 100%; padding: 4px 0; }
+              .contact-item { display: block; margin: 5px 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-container">
+            <div class="email-content">
+              <!-- Header -->
+              <div class="header">
+                <div class="logo-section">
+                  <img src="${window.location.origin}/AIC.jpg" alt="AIC Surfaces" class="logo" />
+                  <div class="company-info">
+                    <h1>AIC SURFACES</h1>
+                    <p>Premium Stone Fabrication</p>
+                  </div>
+                </div>
+                <div class="quote-info">
+                  <h2>QUOTE #${Date.now().toString().slice(-6)}</h2>
+                  <p>${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                </div>
+              </div>
+              
+              <!-- Trust Markers -->
+              <div class="trust-markers">
+                <span class="trust-item">
+                  <span class="icon">✓</span> Licensed & Insured
+                </span>
+                <span class="trust-item">
+                  <span class="icon">✓</span> 20+ Years Experience
+                </span>
+                <span class="trust-item">
+                  <span class="icon">✓</span> AI-Optimized Layouts
+                </span>
+                <span class="trust-item">
+                  <span class="icon">✓</span> Best Price Guarantee
+                </span>
+              </div>
+              
+              <!-- Customer Information -->
+              <div class="customer-section">
+                <h3>👤 Customer Information</h3>
+                <table class="customer-grid">
+                  <tr>
+                    <td>
+                      <div class="customer-field">
+                        <label>Full Name</label>
+                        <div class="value">${userInfo.name || 'Not Provided'}</div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="customer-field">
+                        <label>Email Address</label>
+                        <div class="value">${userInfo.email || 'Not Provided'}</div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="customer-field">
+                        <label>Phone Number</label>
+                        <div class="value">${userInfo.phone || 'Not Provided'}</div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              
+              <!-- Summary Cards -->
+              <table class="summary-cards">
+                <tr>
+                  <td>
+                    <div class="summary-card primary">
+                      <div class="value">${totalPrice}</div>
+                      <div class="label">Total Investment</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="summary-card">
+                      <div class="value">${totalSlabs}</div>
+                      <div class="label">Slabs Required</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="summary-card">
+                      <div class="value">${avgEfficiency}%</div>
+                      <div class="label">Avg. Efficiency</div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Products -->
+              <div class="products-section">
+                <div class="section-header">
+                  <span style="font-size: 24px;">📦</span>
+                  <h3>Quote Details</h3>
+                </div>
+                
+                ${allResults.map((p, i) => {
+                  const effClass = p.result?.efficiency > 80 ? 'efficiency-high' : 
+                                  p.result?.efficiency > 60 ? 'efficiency-medium' : 'efficiency-low';
+                  return `
+                    <div class="product-card">
+                      <table class="product-header" width="100%">
+                        <tr>
+                          <td>
+                            <div class="product-name">${p.customName || `Product ${i + 1}`}</div>
+                          </td>
+                          <td>
+                            <div class="product-price">${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
+                          </td>
+                        </tr>
+                      </table>
+                      <table class="product-details">
+                        <tr>
+                          <td>
+                            <div class="detail-label">Stone Type</div>
+                            <div class="detail-value">${p.stone}</div>
+                          </td>
+                          <td>
+                            <div class="detail-label">Dimensions</div>
+                            <div class="detail-value">${p.width}" × ${p.depth}"</div>
+                          </td>
+                          <td>
+                            <div class="detail-label">Quantity</div>
+                            <div class="detail-value">${p.quantity} pieces</div>
+                          </td>
+                          <td>
+                            <div class="detail-label">Edge Detail</div>
+                            <div class="detail-value">${p.edgeDetail}</div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="detail-label">Area</div>
+                            <div class="detail-value">${p.result?.usableAreaSqft?.toFixed(1) || '0'} sq ft</div>
+                          </td>
+                          <td>
+                            <div class="detail-label">Slabs</div>
+                            <div class="detail-value">${p.result?.totalSlabsNeeded || '0'}</div>
+                          </td>
+                          <td>
+                            <div class="detail-label">Per Slab</div>
+                            <div class="detail-value">${p.result?.topsPerSlab || '0'} pieces</div>
+                          </td>
+                          <td>
+                            <div class="detail-label">Efficiency</div>
+                            <div class="detail-value">
+                              <span class="efficiency-badge ${effClass}">
+                                ${p.result?.efficiency?.toFixed(0) || '0'}%
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                      ${p.note ? `
+                        <div class="product-note">
+                          <strong>Note:</strong> ${p.note}
+                        </div>
+                      ` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+              
+              <!-- CTA Button -->
+              <div class="cta-section">
+                <a href="mailto:quotes@aicsurfaces.com?subject=Quote%20${Date.now().toString().slice(-6)}%20Acceptance" class="cta-button">
+                  Accept Quote & Schedule Consultation
+                </a>
+              </div>
+              
+              <!-- Footer -->
+              <div class="footer">
+                <p><strong>This quote is valid for 30 days from the date above</strong></p>
+                <p>Prices subject to material availability and final measurements</p>
+                
+                <div class="contact-info">
+                  <span class="contact-item">📞 (555) 123-4567</span>
+                  <span class="contact-item">✉️ quotes@aicsurfaces.com</span>
+                  <span class="contact-item">🌐 www.aicsurfaces.com</span>
+                </div>
+                
+                <p class="tagline">Generated by AIC Surfaces Stone Estimator • Powered by AI Optimization</p>
+              </div>
+            </div>
           </div>
+        </body>
+        </html>
+      `;
           
           <div style="background: white; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none;">
             <p style="color: #4b5563; margin-bottom: 30px;">Dear ${userInfo.name},</p>
@@ -1371,7 +1927,7 @@ export default function StoneTopEstimator() {
               <h2 style="color: #0f766e; margin: 0 0 20px 0; font-size: 24px;">Your Quote Summary</h2>
               
               <div style="display: inline-block; margin: 0 15px;">
-                <div style="color: #14b8a6; font-size: 36px; font-weight: bold;">$${totalPrice}</div>
+                <div style="color: #14b8a6; font-size: 36px; font-weight: bold;">${totalPrice}</div>
                 <div style="color: #6b7280; font-size: 14px;">Total Investment</div>
               </div>
               
@@ -1395,7 +1951,7 @@ export default function StoneTopEstimator() {
                       <strong style="color: #1f2937;">${p.customName || 'Product'}</strong>
                       <div style="color: #6b7280; font-size: 14px;">${p.stone} • ${p.width}"×${p.depth}" • Qty: ${p.quantity}</div>
                     </div>
-                    <div style="color: #059669; font-size: 20px; font-weight: bold;">$${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
+                    <div style="color: #059669; font-size: 20px; font-weight: bold;">${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
                   </div>
                 </div>
               `).join('')}
@@ -1694,42 +2250,42 @@ export default function StoneTopEstimator() {
               const markup = parseFloat(stone?.["Mark Up"]) || 1;
               
               return (
-                <Card key={i} className="p-6 hover:shadow-md transition-shadow">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div className="flex-1">
+                <Card key={i} className="p-8 hover:shadow-md transition-shadow">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                    <div className="flex-1 min-w-[200px]">
                       <h3 className="text-xl font-semibold text-gray-900 mb-1">
                         {p.customName || `Product ${i + 1}`}
                       </h3>
                       <p className="text-gray-600 text-sm">{p.stone}</p>
                     </div>
                     
-                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-10 gap-4 flex-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-3 flex-1">
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Size</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Size</p>
                         <p className="font-semibold text-gray-900">{p.width}×{p.depth}"</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Qty</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Qty</p>
                         <p className="font-semibold text-gray-900">{p.quantity}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Edge</p>
-                        <p className="font-semibold text-gray-900">{p.edgeDetail}</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Edge</p>
+                        <p className="font-semibold text-gray-900 text-sm">{p.edgeDetail}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Area</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Area</p>
                         <p className="font-semibold text-gray-900">{p.result?.usableAreaSqft?.toFixed(1)} ft²</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Per Slab</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Per Slab</p>
                         <p className="font-semibold text-purple-600">{p.result?.topsPerSlab || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Slabs</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Slabs</p>
                         <p className="font-semibold text-blue-600">{p.result?.totalSlabsNeeded || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Efficiency</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Efficiency</p>
                         <p className={`font-bold ${
                           (p.result?.efficiency || 0) > 80 ? 'text-green-600' : 
                           (p.result?.efficiency || 0) > 60 ? 'text-yellow-600' : 'text-red-600'
@@ -1738,16 +2294,16 @@ export default function StoneTopEstimator() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Material</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Material</p>
                         <p className="font-semibold text-blue-600">${((p.result?.materialCost || 0) * markup)?.toFixed(0) || '0'}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Fab</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Fab</p>
                         <p className="font-semibold text-orange-600">${(p.result?.fabricationCost || 0)?.toFixed(0) || '0'}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Total</p>
-                        <p className="font-bold text-green-600 text-xl">${p.result?.finalPrice?.toFixed(0) || '0'}</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Total</p>
+                        <p className="font-bold text-green-600 text-lg">${p.result?.finalPrice?.toFixed(0) || '0'}</p>
                       </div>
                     </div>
                   </div>
