@@ -1022,7 +1022,7 @@ export default function StoneTopEstimator() {
           <!-- Header -->
           <div class="header">
             <div class="logo-section">
-              <img src="/aic.jpg" alt="AIC Surfaces" class="logo" />
+              <img src="${window.location.origin}/AIC.jpg" alt="AIC Surfaces" class="logo" onerror="this.style.display='none'" />
               <div class="company-info">
                 <h1>AIC SURFACES</h1>
                 <p>PREMIUM STONE FABRICATION</p>
@@ -1354,6 +1354,7 @@ export default function StoneTopEstimator() {
       const emailHTML = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
+            <img src="${window.location.origin}/AIC.jpg" alt="AIC Surfaces" style="width: 80px; height: 80px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
             <h1 style="color: white; margin: 0; font-size: 32px;">AIC SURFACES</h1>
             <p style="color: #a7f3d0; margin: 10px 0 0 0; font-size: 14px; letter-spacing: 2px;">PREMIUM STONE QUOTE</p>
           </div>
@@ -1468,7 +1469,7 @@ export default function StoneTopEstimator() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <img src="/aic.jpg" alt="AIC Logo" className="w-12 h-12 rounded-xl shadow-sm" />
+                <img src="/AIC.jpg" alt="AIC Logo" className="w-12 h-12 rounded-xl shadow-sm" />
                 <div>
                   <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-teal-700 bg-clip-text text-transparent">
                     AIC Surfaces
@@ -1539,7 +1540,7 @@ export default function StoneTopEstimator() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <img src="/aic.jpg" alt="AIC Logo" className="w-12 h-12 rounded-xl shadow-sm" />
+                <img src="/AIC.jpg" alt="AIC Logo" className="w-12 h-12 rounded-xl shadow-sm" />
                 <div>
                   <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-teal-700 bg-clip-text text-transparent">
                     AIC Surfaces
@@ -1688,66 +1689,79 @@ export default function StoneTopEstimator() {
 
           {/* Results Cards */}
           <div className="space-y-4 mb-8">
-            {allResults.map((p, i) => (
-              <Card key={i} className="p-6 hover:shadow-md transition-shadow">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                      {p.customName || `Product ${i + 1}`}
-                    </h3>
-                    <p className="text-gray-600 text-sm">{p.stone}</p>
+            {allResults.map((p, i) => {
+              const stone = stoneOptions.find(s => s["Stone Type"] === p.stone);
+              const markup = parseFloat(stone?.["Mark Up"]) || 1;
+              
+              return (
+                <Card key={i} className="p-6 hover:shadow-md transition-shadow">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                        {p.customName || `Product ${i + 1}`}
+                      </h3>
+                      <p className="text-gray-600 text-sm">{p.stone}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-10 gap-4 flex-1">
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Size</p>
+                        <p className="font-semibold text-gray-900">{p.width}×{p.depth}"</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Qty</p>
+                        <p className="font-semibold text-gray-900">{p.quantity}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Edge</p>
+                        <p className="font-semibold text-gray-900">{p.edgeDetail}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Area</p>
+                        <p className="font-semibold text-gray-900">{p.result?.usableAreaSqft?.toFixed(1)} ft²</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Per Slab</p>
+                        <p className="font-semibold text-purple-600">{p.result?.topsPerSlab || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Slabs</p>
+                        <p className="font-semibold text-blue-600">{p.result?.totalSlabsNeeded || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Efficiency</p>
+                        <p className={`font-bold ${
+                          (p.result?.efficiency || 0) > 80 ? 'text-green-600' : 
+                          (p.result?.efficiency || 0) > 60 ? 'text-yellow-600' : 'text-red-600'
+                        }`}>
+                          {p.result?.efficiency?.toFixed(0) || '0'}%
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Material</p>
+                        <p className="font-semibold text-blue-600">${((p.result?.materialCost || 0) * markup)?.toFixed(0) || '0'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Fab</p>
+                        <p className="font-semibold text-orange-600">${(p.result?.fabricationCost || 0)?.toFixed(0) || '0'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Total</p>
+                        <p className="font-bold text-green-600 text-xl">${p.result?.finalPrice?.toFixed(0) || '0'}</p>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 flex-1">
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Size</p>
-                      <p className="font-semibold text-gray-900">{p.width}×{p.depth}"</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Qty</p>
-                      <p className="font-semibold text-gray-900">{p.quantity}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Edge</p>
-                      <p className="font-semibold text-gray-900">{p.edgeDetail}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Area</p>
-                      <p className="font-semibold text-gray-900">{p.result?.usableAreaSqft?.toFixed(1)} ft²</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Per Slab</p>
-                      <p className="font-semibold text-purple-600">{p.result?.topsPerSlab || '-'}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Slabs</p>
-                      <p className="font-semibold text-blue-600">{p.result?.totalSlabsNeeded || '-'}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Efficiency</p>
-                      <p className={`font-bold ${
-                        (p.result?.efficiency || 0) > 80 ? 'text-green-600' : 
-                        (p.result?.efficiency || 0) > 60 ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
-                        {p.result?.efficiency?.toFixed(0) || '0'}%
+                  {p.note && (
+                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-sm text-amber-800">
+                        <span className="font-semibold">Note:</span> {p.note}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Total</p>
-                      <p className="font-bold text-green-600 text-xl">${p.result?.finalPrice?.toFixed(0) || '0'}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {p.note && (
-                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <p className="text-sm text-amber-800">
-                      <span className="font-semibold">Note:</span> {p.note}
-                    </p>
-                  </div>
-                )}
-              </Card>
-            ))}
+                  )}
+                </Card>
+              );
+            })}
           </div>
 
           {/* Total Summary */}
@@ -1761,11 +1775,12 @@ export default function StoneTopEstimator() {
               </div>
               <div className="text-right">
                 <p className="text-teal-100 text-sm">
-                  Material: ${allResults.reduce((sum, p) => sum + (p.result?.materialCost || 0), 0).toFixed(0)} • 
+                  Material: ${allResults.reduce((sum, p) => {
+                    const stone = stoneOptions.find(s => s["Stone Type"] === p.stone);
+                    const markup = parseFloat(stone?.["Mark Up"]) || 1;
+                    return sum + ((p.result?.materialCost || 0) * markup);
+                  }, 0).toFixed(0)} • 
                   Fabrication: ${allResults.reduce((sum, p) => sum + (p.result?.fabricationCost || 0), 0).toFixed(0)}
-                </p>
-                <p className="text-teal-100 text-sm mt-1">
-                  Raw Cost: ${allResults.reduce((sum, p) => sum + (p.result?.rawCost || 0), 0).toFixed(0)}
                 </p>
               </div>
             </div>
