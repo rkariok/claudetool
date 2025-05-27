@@ -1979,7 +1979,7 @@ export default function StoneTopEstimator() {
             </div>
           </div>
         </div>
-      `;
+      \`;
       
       const templateParams = {
         to_email: userInfo.email,
