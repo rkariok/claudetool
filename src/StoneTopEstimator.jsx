@@ -1965,20 +1965,20 @@ export default function StoneTopEstimator() {
             
             <div style="border-top: 2px solid #e5e7eb; padding-top: 30px; margin-top: 40px;">
               <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
-                <strong>Next Steps:</strong><br />
+                <strong>Next Steps:<\/strong><br />
                 1. Review your quote details<br />
                 2. Click the button above to accept<br />
                 3. We'll contact you within 24 hours to schedule your template<br />
                 4. Your dream countertops will be ready in 2-3 weeks!
-              </p>
+              <\/p>
               
               <p style="color: #9ca3af; font-size: 12px; margin-top: 20px; text-align: center;">
                 This quote is valid for 30 days • Questions? Call (555) 123-4567<br />
                 Generated on ${new Date().toLocaleDateString()} • Powered by AI Optimization
-              </p>
-            </div>
-          </div>
-        </div>
+              <\/p>
+            <\/div>
+          <\/div>
+        <\/div>
       `;
       
       const templateParams = {
