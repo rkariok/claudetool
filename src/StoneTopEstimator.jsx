@@ -462,7 +462,6 @@ export default function StoneTopEstimator() {
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [showVisualLayouts, setShowVisualLayouts] = useState(true);
   const [optimizeAcrossProducts, setOptimizeAcrossProducts] = useState(false);
-  const [optimizeAcrossProducts, setOptimizeAcrossProducts] = useState(false);
 
   const [userInfo, setUserInfo] = useState({ name: "", email: "", phone: "" });
   const [products, setProducts] = useState([
