@@ -133,7 +133,9 @@ const Button = ({ children, variant = 'default', size = 'default', className = '
       {children}
     </button>
   );
-};
+}
+
+export default StoneTopEstimator;;
 
 // Enhanced Slab Layout Visualization Component with animations
 const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSlab, includeKerf, kerfWidth, showMaxLayout = false }) => {
