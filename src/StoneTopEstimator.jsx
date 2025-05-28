@@ -369,6 +369,7 @@ export default function StoneTopEstimator() {
   const [breakageBuffer, setBreakageBuffer] = useState(10);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [showVisualLayouts, setShowVisualLayouts] = useState(true);
+  const [optimizeAcrossProducts, setOptimizeAcrossProducts] = useState(false);
 
   const [userInfo, setUserInfo] = useState({ name: "", email: "", phone: "" });
   const [products, setProducts] = useState([
@@ -428,7 +429,8 @@ export default function StoneTopEstimator() {
         includeKerf,
         kerfWidth,
         breakageBuffer,
-        showVisualLayouts
+        showVisualLayouts,
+        optimizeAcrossProducts
       }
     };
 
@@ -445,6 +447,7 @@ export default function StoneTopEstimator() {
     setKerfWidth(quote.settings.kerfWidth);
     setBreakageBuffer(quote.settings.breakageBuffer);
     setShowVisualLayouts(quote.settings.showVisualLayouts);
+    setOptimizeAcrossProducts(quote.settings.optimizeAcrossProducts || false);
     setShowSavedQuotes(false);
     alert('Quote loaded successfully!');
   };
@@ -901,6 +904,7 @@ export default function StoneTopEstimator() {
             padding: 20px;
             margin-bottom: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: relative;
           }
           
           .product-header {
@@ -968,6 +972,18 @@ export default function StoneTopEstimator() {
           .efficiency-low {
             background: #fee2e2;
             color: #991b1b;
+          }
+          
+          .optimized-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #14b8a6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 600;
           }
           
           /* Footer Section */
@@ -1104,6 +1120,7 @@ export default function StoneTopEstimator() {
                               p.result?.efficiency > 60 ? 'efficiency-medium' : 'efficiency-low';
               return `
                 <div class="product-card">
+                  ${p.result?.sharedSlabs ? '<div class="optimized-badge">Optimized</div>' : ''}
                   <div class="product-header">
                     <div class="product-name">${p.customName || `Product ${i + 1}`}</div>
                     <div class="product-price">$${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
@@ -1155,6 +1172,15 @@ export default function StoneTopEstimator() {
               `;
             }).join('')}
           </div>
+          
+          ${optimizeAcrossProducts ? `
+            <div style="background: #f0fdfa; border: 1px solid #5eead4; border-radius: 8px; padding: 16px; margin-bottom: 30px; text-align: center;">
+              <p style="color: #0f766e; font-size: 14px; margin: 0;">
+                <strong>✨ Cross-Product Optimization Enabled</strong><br>
+                <span style="font-size: 13px;">Products with the same stone type have been optimized to share slabs when possible, maximizing material efficiency.</span>
+              </p>
+            </div>
+          ` : ''}
           
           <!-- Footer -->
           <div class="footer">
@@ -1256,65 +1282,213 @@ export default function StoneTopEstimator() {
   const calculateAll = () => {
     console.log("Calculate button clicked!");
     
-    const results = products.map((product) => {
-      const stone = stoneOptions.find(s => s["Stone Type"] === product.stone);
-      if (!stone) return { ...product, result: null };
-
-      const slabCost = parseFloat(stone["Slab Cost"]);
-      const fabCost = parseFloat(stone["Fab Cost"]);
-      const markup = parseFloat(stone["Mark Up"]);
-      const w = parseFloat(product.width);
-      const d = parseFloat(product.depth);
-      const quantity = parseInt(product.quantity);
-
-      if (!w || !d || isNaN(slabCost) || isNaN(fabCost) || isNaN(markup)) return { ...product, result: null };
-
-      const slabWidth = parseFloat(stone["Slab Width"]);
-      const slabHeight = parseFloat(stone["Slab Height"]);
-
-      const pieces = Array(quantity).fill().map((_, i) => ({
-        id: i + 1,
-        width: w,
-        depth: d,
-        name: `${product.stone} #${i + 1}`
-      }));
-
-      const maxPiecesPerSlab = calculateMaxPiecesPerSlab(w, d, slabWidth, slabHeight);
-      
-      const area = w * d;
-      const usableAreaSqft = (area / 144) * quantity;
-      const totalSlabsNeeded = Math.ceil(quantity / maxPiecesPerSlab);
-      const totalSlabArea = totalSlabsNeeded * slabWidth * slabHeight;
-      const totalUsedArea = pieces.reduce((sum, p) => sum + p.width * p.depth, 0);
-      const efficiency = totalSlabArea > 0 ? (totalUsedArea / totalSlabArea) * 100 : 0;
-      
-      const materialCost = (slabCost * totalSlabsNeeded) * (1 + breakageBuffer/100);
-      const fabricationCost = usableAreaSqft * fabCost;
-      const rawCost = materialCost + fabricationCost;
-      const finalPrice = rawCost * markup;
-
-      return {
-        ...product,
-        result: {
-          usableAreaSqft,
-          totalSlabsNeeded,
-          efficiency,
-          materialCost,
-          fabricationCost,
-          rawCost,
-          finalPrice,
-          topsPerSlab: maxPiecesPerSlab
+    if (optimizeAcrossProducts) {
+      // Group products by stone type
+      const productsByStone = {};
+      products.forEach((product, index) => {
+        if (!product.stone || !product.width || !product.depth) return;
+        
+        if (!productsByStone[product.stone]) {
+          productsByStone[product.stone] = [];
         }
-      };
-    });
+        
+        const quantity = parseInt(product.quantity) || 1;
+        for (let i = 0; i < quantity; i++) {
+          productsByStone[product.stone].push({
+            ...product,
+            originalIndex: index,
+            pieceIndex: i,
+            quantity: 1,
+            individualPiece: true
+          });
+        }
+      });
+      
+      const results = [];
+      
+      // Process each stone type group
+      Object.keys(productsByStone).forEach(stoneType => {
+        const stoneProducts = productsByStone[stoneType];
+        const stone = stoneOptions.find(s => s["Stone Type"] === stoneType);
+        if (!stone) return;
+        
+        const slabCost = parseFloat(stone["Slab Cost"]);
+        const fabCost = parseFloat(stone["Fab Cost"]);
+        const markup = parseFloat(stone["Mark Up"]);
+        const slabWidth = parseFloat(stone["Slab Width"]);
+        const slabHeight = parseFloat(stone["Slab Height"]);
+        
+        // Sort products by area (largest first) for better packing
+        stoneProducts.sort((a, b) => {
+          const areaA = parseFloat(a.width) * parseFloat(a.depth);
+          const areaB = parseFloat(b.width) * parseFloat(b.depth);
+          return areaB - areaA;
+        });
+        
+        // Pack products into slabs
+        const slabs = [];
+        const kerf = includeKerf ? kerfWidth : 0;
+        
+        stoneProducts.forEach(product => {
+          const w = parseFloat(product.width);
+          const d = parseFloat(product.depth);
+          let placed = false;
+          
+          // Try to fit in existing slabs
+          for (let slab of slabs) {
+            // Check if product fits in any remaining space
+            const fits = canFitInSlab(slab, w, d, slabWidth, slabHeight, kerf);
+            if (fits) {
+              slab.products.push(product);
+              slab.usedArea += w * d;
+              placed = true;
+              break;
+            }
+          }
+          
+          // If doesn't fit in any existing slab, create new one
+          if (!placed) {
+            slabs.push({
+              products: [product],
+              usedArea: w * d
+            });
+          }
+        });
+        
+        // Calculate costs for this stone type
+        const totalSlabsNeeded = slabs.length;
+        const totalUsedArea = stoneProducts.reduce((sum, p) => 
+          sum + parseFloat(p.width) * parseFloat(p.depth), 0
+        );
+        const totalSlabArea = totalSlabsNeeded * slabWidth * slabHeight;
+        const efficiency = totalSlabArea > 0 ? (totalUsedArea / totalSlabArea) * 100 : 0;
+        
+        const materialCost = (slabCost * totalSlabsNeeded) * (1 + breakageBuffer/100);
+        const totalUsableAreaSqft = totalUsedArea / 144;
+        const fabricationCost = totalUsableAreaSqft * fabCost;
+        const rawCost = materialCost + fabricationCost;
+        const finalPrice = rawCost * markup;
+        
+        // Assign results back to original products
+        products.forEach((product, index) => {
+          if (product.stone === stoneType) {
+            const productPieces = stoneProducts.filter(p => p.originalIndex === index);
+            const productArea = productPieces.reduce((sum, p) => 
+              sum + parseFloat(p.width) * parseFloat(p.depth), 0
+            );
+            const productUsableAreaSqft = productArea / 144;
+            
+            // Calculate proportional costs
+            const productMaterialCost = (productArea / totalUsedArea) * materialCost;
+            const productFabCost = productUsableAreaSqft * fabCost;
+            const productRawCost = productMaterialCost + productFabCost;
+            const productFinalPrice = productRawCost * markup;
+            
+            // Find which slabs contain this product's pieces
+            const productSlabs = slabs.filter(slab => 
+              slab.products.some(p => p.originalIndex === index)
+            );
+            
+            results[index] = {
+              ...product,
+              result: {
+                usableAreaSqft: productUsableAreaSqft,
+                totalSlabsNeeded: productSlabs.length,
+                efficiency: efficiency,
+                materialCost: productMaterialCost,
+                fabricationCost: productFabCost,
+                rawCost: productRawCost,
+                finalPrice: productFinalPrice,
+                topsPerSlab: Math.ceil(productPieces.length / productSlabs.length),
+                sharedSlabs: productSlabs.length < productPieces.length,
+                optimizedGroup: stoneType
+              }
+            };
+          }
+        });
+      });
+      
+      // Fill in any missing results
+      const finalResults = products.map((product, index) => {
+        return results[index] || { ...product, result: null };
+      });
+      
+      setProducts(finalResults);
+      setAllResults(finalResults);
+    } else {
+      // Original calculation logic (unchanged)
+      const results = products.map((product) => {
+        const stone = stoneOptions.find(s => s["Stone Type"] === product.stone);
+        if (!stone) return { ...product, result: null };
 
-    const updatedProducts = products.map((product, index) => ({
-      ...product,
-      result: results[index]?.result || null
-    }));
-    setProducts(updatedProducts);
-    setAllResults(results);
+        const slabCost = parseFloat(stone["Slab Cost"]);
+        const fabCost = parseFloat(stone["Fab Cost"]);
+        const markup = parseFloat(stone["Mark Up"]);
+        const w = parseFloat(product.width);
+        const d = parseFloat(product.depth);
+        const quantity = parseInt(product.quantity);
+
+        if (!w || !d || isNaN(slabCost) || isNaN(fabCost) || isNaN(markup)) return { ...product, result: null };
+
+        const slabWidth = parseFloat(stone["Slab Width"]);
+        const slabHeight = parseFloat(stone["Slab Height"]);
+
+        const pieces = Array(quantity).fill().map((_, i) => ({
+          id: i + 1,
+          width: w,
+          depth: d,
+          name: `${product.stone} #${i + 1}`
+        }));
+
+        const maxPiecesPerSlab = calculateMaxPiecesPerSlab(w, d, slabWidth, slabHeight);
+        
+        const area = w * d;
+        const usableAreaSqft = (area / 144) * quantity;
+        const totalSlabsNeeded = Math.ceil(quantity / maxPiecesPerSlab);
+        const totalSlabArea = totalSlabsNeeded * slabWidth * slabHeight;
+        const totalUsedArea = pieces.reduce((sum, p) => sum + p.width * p.depth, 0);
+        const efficiency = totalSlabArea > 0 ? (totalUsedArea / totalSlabArea) * 100 : 0;
+        
+        const materialCost = (slabCost * totalSlabsNeeded) * (1 + breakageBuffer/100);
+        const fabricationCost = usableAreaSqft * fabCost;
+        const rawCost = materialCost + fabricationCost;
+        const finalPrice = rawCost * markup;
+
+        return {
+          ...product,
+          result: {
+            usableAreaSqft,
+            totalSlabsNeeded,
+            efficiency,
+            materialCost,
+            fabricationCost,
+            rawCost,
+            finalPrice,
+            topsPerSlab: maxPiecesPerSlab
+          }
+        };
+      });
+
+      const updatedProducts = products.map((product, index) => ({
+        ...product,
+        result: results[index]?.result || null
+      }));
+      setProducts(updatedProducts);
+      setAllResults(results);
+    }
+    
     setShowResults(true);
+  };
+  
+  // Helper function to check if a piece can fit in a slab with existing pieces
+  const canFitInSlab = (slab, width, height, slabWidth, slabHeight, kerf) => {
+    // This is a simplified bin packing check
+    // In a real implementation, you'd use more sophisticated algorithms
+    const totalAreaNeeded = slab.usedArea + (width * height);
+    const slabArea = slabWidth * slabHeight;
+    
+    // Simple area check - can be improved with actual 2D bin packing
+    return totalAreaNeeded <= slabArea * 0.85; // 85% efficiency threshold
   };
 
   const generatePDF = async () => {
@@ -1371,7 +1545,7 @@ export default function StoneTopEstimator() {
               <h2 style="color: #0f766e; margin: 0 0 20px 0; font-size: 24px;">Your Quote Summary</h2>
               
               <div style="display: inline-block; margin: 0 15px;">
-                <div style="color: #14b8a6; font-size: 36px; font-weight: bold;">$${totalPrice}</div>
+                <div style="color: #14b8a6; font-size: 36px; font-weight: bold;">${totalPrice}</div>
                 <div style="color: #6b7280; font-size: 14px;">Total Investment</div>
               </div>
               
@@ -1395,7 +1569,7 @@ export default function StoneTopEstimator() {
                       <strong style="color: #1f2937;">${p.customName || 'Product'}</strong>
                       <div style="color: #6b7280; font-size: 14px;">${p.stone} • ${p.width}"×${p.depth}" • Qty: ${p.quantity}</div>
                     </div>
-                    <div style="color: #059669; font-size: 20px; font-weight: bold;">$${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
+                    <div style="color: #059669; font-size: 20px; font-weight: bold;">${p.result?.finalPrice?.toFixed(2) || '0.00'}</div>
                   </div>
                 </div>
               `).join('')}
@@ -1429,11 +1603,11 @@ export default function StoneTopEstimator() {
         to_email: userInfo.email,
         to_name: userInfo.name,
         phone: userInfo.phone || 'Not provided',
-        total_price: '$' + totalPrice,
+        total_price: ' + totalPrice,
         total_slabs: totalSlabs.toString(),
         average_efficiency: avgEfficiency + '%',
         products_list: allResults.map(p => 
-          `- ${p.customName || 'Product'}: ${p.stone} ${p.width}"×${p.depth}" (Qty: ${p.quantity}) - $${p.result?.finalPrice?.toFixed(2) || '0.00'}`
+          `- ${p.customName || 'Product'}: ${p.stone} ${p.width}"×${p.depth}" (Qty: ${p.quantity}) - ${p.result?.finalPrice?.toFixed(2) || '0.00'}`
         ).join('\n'),
         quote_date: new Date().toLocaleDateString(),
         html_content: emailHTML // Add the HTML content
@@ -1678,6 +1852,12 @@ export default function StoneTopEstimator() {
                             <span className="text-teal-600">Slabs Needed:</span>
                             <span className="font-bold text-teal-700">{product.result.totalSlabsNeeded}</span>
                           </div>
+                          {product.result?.sharedSlabs && (
+                            <div className="flex justify-between">
+                              <span className="text-teal-600">Optimization:</span>
+                              <span className="font-bold text-teal-700">Shared Slab</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1691,10 +1871,10 @@ export default function StoneTopEstimator() {
           <div className="space-y-4 mb-8">
             {allResults.map((p, i) => {
               const stone = stoneOptions.find(s => s["Stone Type"] === p.stone);
-              const markup = parseFloat(stone?.["Mark Up"]) || 1;
+              const markup = parseFloat(stone?.["Mark Up"]) || 1);
               
               return (
-                <Card key={i} className="p-8 hover:shadow-md transition-shadow">
+                <Card key={i} className="p-8 hover:shadow-md transition-shadow relative">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                     <div className="flex-1 min-w-[200px]">
                       <h3 className="text-xl font-semibold text-gray-900 mb-1">
@@ -1752,6 +1932,12 @@ export default function StoneTopEstimator() {
                     </div>
                   </div>
                   
+                  {p.result?.sharedSlabs && (
+                    <div className="absolute top-2 right-2 bg-teal-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                      Optimized
+                    </div>
+                  )}
+                  
                   {p.note && (
                     <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                       <p className="text-sm text-amber-800">
@@ -1772,6 +1958,11 @@ export default function StoneTopEstimator() {
                 <p className="text-4xl font-bold">
                   ${allResults.reduce((sum, p) => sum + (p.result?.finalPrice || 0), 0).toFixed(2)}
                 </p>
+                {optimizeAcrossProducts && (
+                  <p className="text-teal-100 text-xs mt-1">
+                    ✨ Cross-product optimization enabled
+                  </p>
+                )}
               </div>
               <div className="text-right">
                 <p className="text-teal-100 text-sm">
@@ -1930,6 +2121,12 @@ export default function StoneTopEstimator() {
                   label="Visual Preview" 
                   checked={showVisualLayouts} 
                   onChange={() => setShowVisualLayouts(!showVisualLayouts)} 
+                />
+                
+                <Toggle 
+                  label="Optimize Across Products" 
+                  checked={optimizeAcrossProducts} 
+                  onChange={() => setOptimizeAcrossProducts(!optimizeAcrossProducts)} 
                 />
                 
                 <div>
