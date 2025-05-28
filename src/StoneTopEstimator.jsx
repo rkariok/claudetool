@@ -226,6 +226,9 @@ const MultiProductSlabVisualization = ({ optimization, slabIndex, slabWidth, sla
     </div>
   );
 };
+
+// Enhanced Slab Layout Visualization Component with animations
+const SlabLayoutVisualization = ({ pieces, slabWidth, slabHeight, maxPiecesPerSlab, includeKerf, kerfWidth, showMaxLayout = false }) => {
   const [isAnimating, setIsAnimating] = useState(true);
   
   useEffect(() => {
